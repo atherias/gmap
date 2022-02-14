@@ -7,6 +7,4 @@ To compile and run:
     $ make
     $ ./hw01
 
-
-
-
+You can also open the `cpp` folder directly in CLion.
