@@ -22,7 +22,6 @@ struct Point {
     if (coordinate == 0) return x;
     else if (coordinate == 1) return y;
     else if (coordinate == 2) return z;
-    else assert(false);
   }
   
   // const coordinate accessor with `[]`
@@ -30,7 +29,6 @@ struct Point {
     if (coordinate == 0) return x;
     else if (coordinate == 1) return y;
     else if (coordinate == 2) return z;
-    else assert(false);
   }
 
   // assignment operator. Assigns values from other point to this point

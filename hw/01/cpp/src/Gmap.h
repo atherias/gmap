@@ -33,7 +33,6 @@ Then you could create and link Darts like:
   Dart* dart_b = new Dart();
 
   dart_a->a0 = dart_b;
-  
 */
 
 struct Dart {
@@ -54,7 +53,7 @@ struct Vertex {
   {}
 
   // constructor with x,y,z arguments to immediately initialise the point member on this Vertex.
-  Vertex(const double &x, const double &y, const double &z) : point(new Point(x,y,z))
+  Vertex(const double &x, const double &y, const double &z) : point(Point(x,y,z))
   {}
 
   // a dart incident to this Vertex:
