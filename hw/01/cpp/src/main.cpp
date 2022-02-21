@@ -40,70 +40,111 @@ int main(int argc, const char * argv[]) {
     // ## Read vertices + faces from an obj file:
     std::ifstream stream_in;
     stream_in.open(file_in);
+
+    // create vectors to hold each structure type
     std::vector<Vertex> vertices;
     std::vector<Face> faces;
     std::vector<Edge> edges;
-    int k=1;
-    int e=1;
+
+    //iterator for faces
+    int k = 1;
+
+    //iterator for edges
+    int e = 1;
+
+    //iterator for indices
+    int i;
+
     if (stream_in.is_open()) {
         std::string line;
+        // read file line by line
         while (getline(stream_in, line)) {
             std::istringstream iss(line);
             std::string word;
+            // get first word
             iss >> word;
+            // check if this is a vertex line
             if (word == "v") {
+                //  make vector of this vertex's coordinates
                 std::vector<float> coordinates;
+                // iterate over each word in the line add coordinates to coordinates vector
                 while (iss >> word) coordinates.push_back(std::stof(word));
+                // once all coordinates added, add vertex to vertices vector
                 if (coordinates.size() == 3) vertices.emplace_back(coordinates[0], coordinates[1], coordinates[2]);
                 else vertices.push_back(Vertex());
             }
-            if (word == "f"){
+                // check if this is a vertex line
+            else if (word == "f") {
                 std::vector<int> indices;
                 while (iss >> word) indices.push_back(std::stof(word));
                 // KEN said make it work for all types of shapes. What we know is every vertex will have two darts within a face.
-                if (indices.size() == 4) {
-                    //push vertices pointers to vertices vector, give an id in the face
-                    // store vertices instead, not pointers, maybe just remove AMPERSAND.
-                    faces.emplace_back(Face{k,((int) indices[0]), ((int) indices[1]), ((int) indices[2]), ((int) indices[3]),
-                                            vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1],
-                                            vertices[indices[3]-1]});
 
-                    //create edges // possibly do it with unordered_map
-                    // removed the ampersand, KEEP ALWAYS THE INDICES
-                    Edge new_edge1 =Edge{e, indices[0], indices[1]};
-                    bool wtfq = std::count(edges.begin(),edges.end(),new_edge1);
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
-//                        edges.emplace_back(new_edge1);
-//                        // increase e only if inserted in the vector
+                // method that works for any polygon shape.
+                // create face
+                faces.emplace_back(Face{k, indices});
+                //add edges to edge vector
+                for (i = 0; i < indices.size(); i++) {
+                    // create edge
+                    Edge new_edge = Edge{e, indices[i], indices[i + 1]};
+                    // check if vector exists
+                    if (!(std::count(edges.begin(), edges.end(), new_edge))) {
+                        edges.emplace_back(new_edge);
+//                      // increase e only if inserted in the vector
+                        e++;
+                    }
+                }
+                // create edge connecting begin to end
+                Edge new_edge = Edge{e, indices[-1], indices[0]};
+                // check if vector exists
+                if (!(std::count(edges.begin(), edges.end(), new_edge))) {
+                    edges.emplace_back(new_edge);
+//                      // increase e only if inserted in the vector
+
+
+
+//                if (indices.size() == 4) {
+//                    //push vertices pointers to vertices vector, give an id in the face
+//                    // store vertices instead, not pointers, maybe just remove AMPERSAND.
+//                    faces.emplace_back(Face{k,((int) indices[0]), ((int) indices[1]), ((int) indices[2]), ((int) indices[3]),
+//                                            vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1],
+//                                            vertices[indices[3]-1]});
+//
+//                    //create edges // possibly do it with unordered_map
+//                    // removed the ampersand, KEEP ALWAYS THE INDICES
+//                    Edge new_edge1 =Edge{e, indices[0], indices[1]};
+//                    bool wtfq = std::count(edges.begin(),edges.end(),new_edge1);
+////                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
+////                        edges.emplace_back(new_edge1);
+////                        // increase e only if inserted in the vector
+////                        e++;
+////                    }
+//
+//                    Edge new_edge2 =Edge{e, indices[1], indices[2]};
+//                    bool wtf = std::count(edges.begin(),edges.end(),new_edge2);
+//
+//                    if (!(std::count(edges.begin(),edges.end(),new_edge2))){
+//                        edges.emplace_back(new_edge2);
+//                        e++;
+//                    }
+//
+//                    Edge new_edge3 =Edge{e, indices[2], indices[3]};
+//                    if (!(std::count(edges.begin(),edges.end(),new_edge3))){
+//                        edges.emplace_back(new_edge3);
+//                        e++;
+//                    }
+//
+//                    Edge new_edge4 =Edge{e, indices[3], indices[0]};
+//                    if (!(std::count(edges.begin(),edges.end(),new_edge4))){
+//                        edges.emplace_back(new_edge4);
 //                        e++;
 //                    }
 
-                    Edge new_edge2 =Edge{e, indices[1], indices[2]};
-                    bool wtf = std::count(edges.begin(),edges.end(),new_edge2);
-
-                    if (!(std::count(edges.begin(),edges.end(),new_edge2))){
-                        edges.emplace_back(new_edge2);
-                        e++;
-                    }
-
-                    Edge new_edge3 =Edge{e, indices[2], indices[3]};
-                    if (!(std::count(edges.begin(),edges.end(),new_edge3))){
-                        edges.emplace_back(new_edge3);
-                        e++;
-                    }
-
-                    Edge new_edge4 =Edge{e, indices[3], indices[0]};
-                    if (!(std::count(edges.begin(),edges.end(),new_edge4))){
-                        edges.emplace_back(new_edge4);
-                        e++;
-                    }
-
                     //increase k for increasing the id of faces
                     k++;
+//                }
                 }
             }
         }
-    }
 
 
 
@@ -136,9 +177,9 @@ int main(int argc, const char * argv[]) {
 //    }
 
 
-    // ## Construct generalised map using the structures from Gmap.h ##
+        // ## Construct generalised map using the structures from Gmap.h ##
 
-    // Triangulation:
+        // Triangulation:
 //    // Step 1: create a new vertex of each of the edges of the face (polygon)
 //    for (auto i = faces.begin(); i != faces.end(); ++i){
 //        std::cout << "print the faces" << std::endl;
@@ -165,35 +206,36 @@ int main(int argc, const char * argv[]) {
 //
 //    }
 
-    //print faces
-    for (auto i = faces.begin(); i != faces.end(); ++i) {
-        std::cout << "print faces" << std::endl;
-        // Task: understand when it can print and when it cannot
-        std::cout << i->fid << " " << i->a1.point <<  std::endl;
+        //print faces
+        for (auto i = faces.begin(); i != faces.end(); ++i) {
+            std::cout << "print faces" << std::endl;
+            // Task: understand when it can print and when it cannot
+            std::cout << i->fid << " " << i->index_list[0] << std::endl;
+        }
+        //print edges
+        for (auto i = edges.begin(); i != edges.end(); ++i) {
+            std::cout << "print edges" << std::endl;
+            // Task: understand when it can print and when it cannot
+            std::cout << i->eid << " " << i->start << " " << i->end << std::endl;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        // ## Output generalised map to CSV ##
+
+        // ## Create triangles from the darts ##
+
+        // ## Write triangles to obj ##
+
+        return 0;
     }
-    //print edges
-    for (auto i = edges.begin(); i != edges.end(); ++i) {
-        std::cout << "print edges" << std::endl;
-        // Task: understand when it can print and when it cannot
-        std::cout << i->eid << " " << i->start << " " << i->end <<  std::endl;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    // ## Output generalised map to CSV ##
-
-    // ## Create triangles from the darts ##
-
-    // ## Write triangles to obj ##
-
-    return 0;
 }
