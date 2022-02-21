@@ -72,28 +72,29 @@ struct Vertex {
 };
 
 struct Edge {
-//    //edge id - maybe just use index
-//    char edge_id;
+    int eid;
+    Vertex *start;
+    Vertex *end;
 
-    // start and end point
-    Vertex *edge_start;
-    Vertex *edge_end;
-
-    // a dart incident to this Edge:
-  // ...
-
-  // function to compute the barycenter for this Edge (needed for triangulation output):
-  Point barycenter(Point edge_end, Point edge_start) {
-      (edge_end - edge_start)/2;
-  }
+    // comparison operator
+    bool operator==(const Edge &other) const{
+        if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
+            return true;
+        }
 };
 
 struct Face {
-    // unique face id - use index
-//    char face_id;
+    // the vertices of this face:
+public:
+    int fid;
+    int a, b, c, d;
 
-    // vector of face vertices
-    std::vector<Vertex> face_vertices;
+    Vertex *a1;
+    Vertex *b1;
+    Vertex *c1;
+    Vertex *d1;
+
+
 
 // a dart incident to this Face:
   // ...
