@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
 //  std::string file_out_csv_2 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_faces.csv";
 //  std::string file_out_csv_3 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_volume.csv";
 
-  // ## Read OBJ file ##
+    // ## Read OBJ file ##
     std::string file_in = "cube.obj";
 //    std::string file_out_obj = "/home/ravi/git/geo1004.2022/hw/01/data/cube_triangulated.obj";
 //    std::string file_out_csv_d = "/home/ravi/git/geo1004.2022/hw/01/data/cube_darts.csv";
@@ -60,33 +60,39 @@ int main(int argc, const char * argv[]) {
             if (word == "f"){
                 std::vector<int> indices;
                 while (iss >> word) indices.push_back(std::stof(word));
+                // KEN said make it work for all types of shapes. What we know is every vertex will have two darts within a face.
                 if (indices.size() == 4) {
-                //push vertices pointers to vertices vector, give an id in the face
+                    //push vertices pointers to vertices vector, give an id in the face
+                    // store vertices instead, not pointers, maybe just remove AMPERSAND.
                     faces.emplace_back(Face{k,((int) indices[0]), ((int) indices[1]), ((int) indices[2]), ((int) indices[3]),
-                                            & vertices[indices[0]-1], & vertices[indices[1]-1], & vertices[indices[2]-1],
-                                            & vertices[indices[3]-1]});
+                                            vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1],
+                                            vertices[indices[3]-1]});
 
                     //create edges // possibly do it with unordered_map
-                    Edge new_edge1 =Edge{e, & vertices[indices[0]-1],& vertices[indices[1]-1] };
-                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
-                        edges.emplace_back(new_edge1);
-                        // increase e only if inserted in the vector
-                        e++;
-                    }
+                    // removed the ampersand, KEEP ALWAYS THE INDICES
+                    Edge new_edge1 =Edge{e, indices[0], indices[1]};
+                    bool wtfq = std::count(edges.begin(),edges.end(),new_edge1);
+//                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
+//                        edges.emplace_back(new_edge1);
+//                        // increase e only if inserted in the vector
+//                        e++;
+//                    }
 
-                    Edge new_edge2 =Edge{e, & vertices[indices[1]-1], & vertices[indices[2]-1]};
+                    Edge new_edge2 =Edge{e, indices[1], indices[2]};
+                    bool wtf = std::count(edges.begin(),edges.end(),new_edge2);
+
                     if (!(std::count(edges.begin(),edges.end(),new_edge2))){
                         edges.emplace_back(new_edge2);
                         e++;
                     }
 
-                    Edge new_edge3 =Edge{e, & vertices[indices[2]-1], & vertices[indices[3]-1]};
+                    Edge new_edge3 =Edge{e, indices[2], indices[3]};
                     if (!(std::count(edges.begin(),edges.end(),new_edge3))){
                         edges.emplace_back(new_edge3);
                         e++;
                     }
 
-                    Edge new_edge4 =Edge{e, & vertices[indices[3]-1], & vertices[indices[1]-1]};
+                    Edge new_edge4 =Edge{e, indices[3], indices[0]};
                     if (!(std::count(edges.begin(),edges.end(),new_edge4))){
                         edges.emplace_back(new_edge4);
                         e++;
@@ -98,6 +104,15 @@ int main(int argc, const char * argv[]) {
             }
         }
     }
+
+
+
+
+
+
+
+
+
 
 
 //// ## Print to see the vertices are stored correctly
@@ -121,13 +136,13 @@ int main(int argc, const char * argv[]) {
 //    }
 
 
-  // ## Construct generalised map using the structures from Gmap.h ##
+    // ## Construct generalised map using the structures from Gmap.h ##
 
-  // Triangulation:
-    // Step 1: create a new vertex of each of the edges of the face (polygon)
-    for (auto i = faces.begin(); i != faces.end(); ++i){
-        std::cout << "print the faces" << std::endl;
-        std::cout << i->fid << " " << i->a1->point << " " << i->b1->point << " " << i->c1->point << " " << i->d1->point << std::endl;
+    // Triangulation:
+//    // Step 1: create a new vertex of each of the edges of the face (polygon)
+//    for (auto i = faces.begin(); i != faces.end(); ++i){
+//        std::cout << "print the faces" << std::endl;
+//        std::cout << i->fid << " " << i->a1->point << " " << i->b1->point << " " << i->c1->point << " " << i->d1->point << std::endl;
 //        // try to print the coordinates of the vertex:
 //        std::cout << "print/access the vertices of the faces" << std::endl;
 //        std::cout << vertices[i->a-1].point[0] << " " << vertices[i->a-1].point[1] << " " << vertices[i->a-1].point[2] << std::endl;
@@ -147,23 +162,38 @@ int main(int argc, const char * argv[]) {
 //        std::cout << "midpoint4 coordinates: " << midpoint4.x << " " << midpoint4.y << " " << midpoint4.z << std::endl;
 //
 
+//
+//    }
 
+    //print faces
+    for (auto i = faces.begin(); i != faces.end(); ++i) {
+        std::cout << "print faces" << std::endl;
+        // Task: understand when it can print and when it cannot
+        std::cout << i->fid << " " << i->a1.point <<  std::endl;
     }
-
     //print edges
     for (auto i = edges.begin(); i != edges.end(); ++i) {
         std::cout << "print edges" << std::endl;
-        std::cout << i->eid << " " << i->start->point << " " << i->end->point << std::endl;
+        // Task: understand when it can print and when it cannot
+        std::cout << i->eid << " " << i->start << " " << i->end <<  std::endl;
     }
 
 
 
-  
-  // ## Output generalised map to CSV ##
 
-  // ## Create triangles from the darts ##
 
-  // ## Write triangles to obj ##
-  
-  return 0;
+
+
+
+
+
+
+
+    // ## Output generalised map to CSV ##
+
+    // ## Create triangles from the darts ##
+
+    // ## Write triangles to obj ##
+
+    return 0;
 }

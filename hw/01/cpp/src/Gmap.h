@@ -73,14 +73,21 @@ struct Vertex {
 
 struct Edge {
     int eid;
-    Vertex *start;
-    Vertex *end;
+    // removed ampersand
+    int start;
+    int end;
 
     // comparison operator
     bool operator==(const Edge &other) const{
         if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
             return true;
         }
+    }
+    // a dart incident to this Edge:
+    // ...
+
+    // function to compute the barycenter for this Edge (needed for triangulation output):
+    // Point barycenter() {}
 };
 
 struct Face {
@@ -89,10 +96,15 @@ public:
     int fid;
     int a, b, c, d;
 
-    Vertex *a1;
-    Vertex *b1;
-    Vertex *c1;
-    Vertex *d1;
+    Vertex a1;
+    Vertex b1;
+    Vertex c1;
+    Vertex d1;
+
+    friend std::ostream &operator << (std::ostream &os, const Vertex& rhs){
+        os << "Vertex = " << rhs.point;
+        return os;
+    }
 
 
 
