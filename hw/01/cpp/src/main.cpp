@@ -9,13 +9,12 @@
 #include "Gmap.h"
 #include <typeinfo>
 
-Point midpoint_edge(Vertex one, Vertex two){
-    float x = (one.point[0] + two.point[0]) / 2;
-    float y = (one.point[1] + two.point[1]) / 2;
-    float z = (one.point[2] + two.point[2]) / 2;
-    return {x,y,z};
-}
-
+//Point midpoint_edge(Vertex one, Vertex two){
+//    float x = (one.point[0] + two.point[0]) / 2;
+//    float y = (one.point[1] + two.point[1]) / 2;
+//    float z = (one.point[2] + two.point[2]) / 2;
+//    return {x,y,z};
+//}
 
 
 int main(int argc, const char * argv[]) {
@@ -28,7 +27,7 @@ int main(int argc, const char * argv[]) {
 //  std::string file_out_csv_3 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_volume.csv";
 
     // ## Read OBJ file ##
-    std::string file_in = "cube.obj";
+    std::string file_in = "geo1004.2022/hw/01/data/cube.obj";
 //    std::string file_out_obj = "/home/ravi/git/geo1004.2022/hw/01/data/cube_triangulated.obj";
 //    std::string file_out_csv_d = "/home/ravi/git/geo1004.2022/hw/01/data/cube_darts.csv";
 //    std::string file_out_csv_0 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_vertices.csv";
@@ -140,11 +139,12 @@ int main(int argc, const char * argv[]) {
 //                    }
 
                     //increase k for increasing the id of faces
-                    k++;
+
 //                }
-                }
-            }
-        }
+                } // end of if edge doesn't exist
+                k++;
+            } // end of if face
+        } // end of while loop
 
 
 
@@ -206,28 +206,12 @@ int main(int argc, const char * argv[]) {
 //
 //    }
 
-        //print faces
-        for (auto i = faces.begin(); i != faces.end(); ++i) {
-            std::cout << "print faces" << std::endl;
-            // Task: understand when it can print and when it cannot
-            std::cout << i->fid << " " << i->index_list[0] << std::endl;
-        }
-        //print edges
-        for (auto i = edges.begin(); i != edges.end(); ++i) {
-            std::cout << "print edges" << std::endl;
-            // Task: understand when it can print and when it cannot
-            std::cout << i->eid << " " << i->start << " " << i->end << std::endl;
-        }
 
+    }// end of if stream open
 
-
-
-
-
-
-
-
-
+    else{
+        std::cout << "not open" << std::endl;
+    }
 
 
         // ## Output generalised map to CSV ##
@@ -236,6 +220,19 @@ int main(int argc, const char * argv[]) {
 
         // ## Write triangles to obj ##
 
-        return 0;
+
+    //print faces
+    for (auto i = faces.begin(); i != faces.end(); ++i) {
+        std::cout << "print faces" << std::endl;
+        // Task: understand when it can print and when it cannot
+        std::cout << i->fid << " " << i->index_list[0] << std::endl;
     }
-}
+    //print edges
+    for (auto i = edges.begin(); i != edges.end(); ++i) {
+        std::cout << "print edges" << std::endl;
+        // Task: understand when it can print and when it cannot
+        std::cout << i->eid << " " << i->start << " " << i->end << std::endl;
+    }
+        return 0;
+
+} // end of main function
