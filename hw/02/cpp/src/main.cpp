@@ -8,6 +8,7 @@ using json = nlohmann::json;
 
 int   get_no_roof_surfaces(json &j);
 void  list_all_vertices(json& j);
+void  visit_roofsurfaces(json &j);
 
 
 
@@ -20,10 +21,12 @@ int main(int argc, const char * argv[]) {
   input.close();
 
   //-- get total number of RoofSurface in the file
-  int noroofsurfaces = get_no_roof_surfaces(j);
-  std::cout << "Total RoofSurface: " << noroofsurfaces << std::endl;
+  // int noroofsurfaces = get_no_roof_surfaces(j);
+  // std::cout << "Total RoofSurface: " << noroofsurfaces << std::endl;
 
   // list_all_vertices(j);
+
+  visit_roofsurfaces(j);
 
   //-- print out the number of Buildings in the file
   int nobuildings = 0;
@@ -50,6 +53,24 @@ int main(int argc, const char * argv[]) {
   o.close();
 
   return 0;
+}
+
+
+void visit_roofsurfaces(json &j) {
+  for (auto& co : j["CityObjects"].items()) {
+    for (auto& g : co.value()["geometry"]) {
+      if (g["type"] == "Solid") {
+        for (int i = 0; i < g["boundaries"].size(); i++) {
+          for (int j = 0; j < g["boundaries"][i].size(); j++) {
+            int sem_index = g["semantics"]["values"][i][j];
+            if (g["semantics"]["surfaces"][sem_index]["type"].get<std::string>().compare("RoofSurface") == 0) {
+              std::cout << "RoofSurface: " << g["boundaries"][i][j] << std::endl;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 
