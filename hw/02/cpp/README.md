@@ -5,9 +5,7 @@ To compile and run:
     $ cd build
     $ cmake ..
     $ make
-    $ ./main --help
-
-    $ ./main
+    $ ./cjdemo
 
 
 
