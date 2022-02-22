@@ -45,23 +45,24 @@ Then you could create and link Darts like:
 //}
 
 struct Dart {
+
+//  // cells - ids that link to other tables?:
+  int vertex_id;
+  int edge_id;
+  int face_id;
+  int volume_id;
+
 //  // involutions: should be pointers to other darts
 //  int a0;
 //  int a1;
 //  int a2;
 //  int a3;
-//
-//  // cells - ids that link to other tables?:
-//  Vertex cell_0;
-//  Edge cell_1;
-//  Face cell_2;
-//  Volume cell_3;
 
 };
 
 struct Vertex {
     // vertex id
-    char vertex_id;
+//    char vertex_id;
 
   // the coordinates of this vertex:
   Point point;
@@ -105,6 +106,7 @@ struct Face {
 public:
     int fid;
     std::vector<int> index_list;
+    std::vector<int> edge_list;
 
 //    int a, b, c, d;
 //

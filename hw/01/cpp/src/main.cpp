@@ -68,6 +68,7 @@ int main(int argc, const char * argv[]) {
     std::vector<Vertex> vertices;
     std::vector<Face> faces;
     std::vector<Edge> edges;
+    std::vector<Dart> darts;
     std::unordered_map<pair , int, pair_hash > unordered_map_2 = { }; // initialize the un_map empty
 
 
@@ -101,13 +102,13 @@ int main(int argc, const char * argv[]) {
                 // check if this is a vertex line
             else if (word == "f") {
                 std::vector<int> indices;
+                std::vector<int> edge_indices;
                 // REMOVE 1 WHILE WE READ SO THAT WE DON'T HAVE IN OUR MINDS TO REMOVE IT EVERY TIME.
                 while (iss >> word) indices.push_back(std::stof(word)-1);
                 // KEN said make it work for all types of shapes. What we know is every vertex will have two darts within a face.
 
                 // method that works for any polygon shape.
-                // create face
-                faces.emplace_back(Face{k, indices});
+
 
                 //iterate over indices, add edges to edge vector
                 for (i = 0; i < indices.size()-1; i++) {
@@ -129,18 +130,11 @@ int main(int argc, const char * argv[]) {
                         // create the edge --> push it to the edges vector (do we need it?)
                         Edge new_edge = Edge{e, indices[i], indices[i + 1]};
                         edges.emplace_back(new_edge);
+                        edge_indices.emplace_back(new_edge.eid);
                         e++;
                     }
                 }
 
-
-//                    if (!(std::count_if(edges.begin(), edges.end(), edge_exists(new_edge,edges)))) {
-//                        // if not in vector, add new edge
-//                        edges.emplace_back(new_edge);
-////                      // increase e only if inserted in the vector
-//                        e++;
-//                    }// end of if edge doesn't exist
-//                } // end of iteration over indices
 
 //                     create edge connecting begin to end
                 int last_element = indices.size()-1;
@@ -160,9 +154,6 @@ int main(int argc, const char * argv[]) {
                     e++;
                 }
 
-//                if (!(std::count(edges.begin(), edges.end(), new_edge))) {
-//                    edges.emplace_back(new_edge);
-                      // increase e only if inserted in the vector
 
 //                if (indices.size() == 4) {
 //                    //push vertices pointers to vertices vector, give an id in the face
@@ -202,37 +193,51 @@ int main(int argc, const char * argv[]) {
 //                    }
 
                     //increase k for increasing the id of faces
-
 //                }
 
 
-            k++;
+                // create face
+                faces.emplace_back(Face{k, indices, edge_indices});
+                k++;
             } // end of if face
         } // end of while loop
+    }// end of if stream open
 
+    // indicates if there is an error with the stream
+    else{
+        std::cout << "file not open" << std::endl;
+    }
 
-//// ## Print to see the vertices are stored correctly
-//    for (auto i = vertices.begin(); i != vertices.end(); ++i){
-//        // why not possible i.x όπως δείχνει στο τέλος του Point.h για να τυπώσει σημείο;
-//        std::cout << i->point[0] << " " << i->point[1] << " " << i->point[2] << std::endl;
-//    }
-////
+        // Create darts
+        int dart_id = 0;
+        int edge_it = 0;
+        int vol_id = 0;
 
-//// ## Print to see the vertices are stored correctly
-//    //std::cout << faces.size() << std::endl;
-//    for (auto i = faces.begin(); i != faces.end(); ++i){
-//        std::cout << "print the faces" << std::endl;
-//        std::cout << i->a << " " << i->b << " " << i->c << " " << i->d << std::endl;
-//        // try to print the coordinates of the vertex:
-//        std::cout << "print/access the vertices of the faces" << std::endl;
-//        std::cout << vertices[i->a-1].point[0] << " " << vertices[i->a-1].point[1] << " " << vertices[i->a-1].point[2] << std::endl;
-//        std::cout << vertices[i->b-1].point[0] << " " << vertices[i->b-1].point[1] << " " << vertices[i->b-1].point[2] << std::endl;
-//        std::cout << vertices[i->c-1].point[0] << " " << vertices[i->c-1].point[1] << " " << vertices[i->c-1].point[2] << std::endl;
-//        std::cout << vertices[i->d-1].point[0] << " " << vertices[i->d-1].point[1] << " " << vertices[i->d-1].point[2] << std::endl;
-//    }
+        //iterate over each face
+        for (int d = 0; d<faces.size(); d++){
+            // within each face, iterate over edges
+            for (faces[d].edge_list[edge_it=0]; edge_it < faces[d].edge_list.size(); edge_it++){
+                // within each edge, get start and end
+//                int dart1_vertex = faces[d].edge_list[edge_it].start;
 
+                int dart1_edge = faces[d].edge_list[edge_it];
+                int dart1_vertex = edges[dart1_edge].start;
+                int dart1_face = faces[d].fid;
 
-        // ## Construct generalised map using the structures from Gmap.h ##
+//                int dart2_vertex = faces[d].edge_list[edge_it].end;
+                int dart2_edge = faces[d].edge_list[edge_it];
+                int dart2_vertex = edges[dart1_edge].end;
+                int dart2_face = faces[d].fid;;
+
+                int dart_vol = 0;
+
+                Dart new_dart1({dart1_vertex, dart1_edge, dart1_face, dart_vol});
+                Dart new_dart2({dart2_vertex, dart2_edge, dart2_face, dart_vol});
+                darts.emplace_back(new_dart1);
+                darts.emplace_back(new_dart2);
+            }
+        }
+
 
         // Triangulation:
 //    // Step 1: create a new vertex of each of the edges of the face (polygon)
@@ -262,11 +267,9 @@ int main(int argc, const char * argv[]) {
 //    }
 
 
-    }// end of if stream open
 
-    else{
-        std::cout << "not open" << std::endl;
-    }
+
+
 
 
         // ## Output generalised map to CSV ##
