@@ -9,12 +9,36 @@
 #include "Gmap.h"
 #include <typeinfo>
 
-//Point midpoint_edge(Vertex one, Vertex two){
-//    float x = (one.point[0] + two.point[0]) / 2;
-//    float y = (one.point[1] + two.point[1]) / 2;
-//    float z = (one.point[2] + two.point[2]) / 2;
-//    return {x,y,z};
-//}
+Point midpoint_edge(Vertex one, Vertex two){
+    float x = (one.point[0] + two.point[0]) / 2;
+    float y = (one.point[1] + two.point[1]) / 2;
+    float z = (one.point[2] + two.point[2]) / 2;
+    return {x,y,z};
+}
+
+// THIS HASH FUNCTION WORKS!
+bool check_one_key(std::unordered_map<int, int> m, int key){
+    if (m.count(key) == 0){
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+// definition of pair
+typedef std::pair<int, int> pair;
+
+// THIS HASH FUNCTION DOESN'T WORK ! // Just added pair_hash and it worked? Doesn't make sense. (It's passed as an argument already??)
+bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
+    //return 1;
+    if (m.count(key) == 0){
+        return false;
+    }
+    else {
+        return true;
+    }
+}
 
 
 int main(int argc, const char * argv[]) {
@@ -44,6 +68,8 @@ int main(int argc, const char * argv[]) {
     std::vector<Vertex> vertices;
     std::vector<Face> faces;
     std::vector<Edge> edges;
+    std::unordered_map<pair , int, pair_hash > unordered_map_2 = { }; // initialize the un_map empty
+
 
     //iterator for faces
     int k = 1;
@@ -75,7 +101,8 @@ int main(int argc, const char * argv[]) {
                 // check if this is a vertex line
             else if (word == "f") {
                 std::vector<int> indices;
-                while (iss >> word) indices.push_back(std::stof(word));
+                // REMOVE 1 WHILE WE READ SO THAT WE DON'T HAVE IN OUR MINDS TO REMOVE IT EVERY TIME.
+                while (iss >> word) indices.push_back(std::stof(word)-1);
                 // KEN said make it work for all types of shapes. What we know is every vertex will have two darts within a face.
 
                 // method that works for any polygon shape.
@@ -83,23 +110,57 @@ int main(int argc, const char * argv[]) {
                 faces.emplace_back(Face{k, indices});
 
                 //iterate over indices, add edges to edge vector
-                for (i = 0; i < indices.size(); i++) {
-                    // create edge
-                    Edge new_edge = Edge{e, indices[i], indices[i + 1]};
-                    // check if edge exists in vector - CHANGE TO UNORDERED MAP
-                    if (!(std::count_if(edges.begin(), edges.end(), edge_exists(new_edge,edges)))) {
-                        // if not in vector, add new edge
+                for (i = 0; i < indices.size()-1; i++) {
+                    // check if edge exists in vector
+
+                    // prepare my pair - edge 1
+                    std::pair<int, int> pair_edge1(indices[i], indices[i + 1]); //indices[0] , indices[1]
+                    // and the opposite
+                    std::pair<int, int> pair_edge11(indices[i + 1], indices[i]); //indices[0] , indices[1]
+                    bool checker1 = check_double_key(unordered_map_2, pair_edge1);
+                    bool checker11 = check_double_key(unordered_map_2, pair_edge11);
+//                    std::cout << "checker edge 1: " << checker1 << std::endl;
+                    if ((!(checker1)) && (!(checker11))) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
+                        //if (checker11==0){
+                        // insert it in the unordered map
+                        unordered_map_2[pair_edge1] = e;
+                        //unordered_map_2.insert((indices[0], indices[1]),1);
+
+                        // create the edge --> push it to the edges vector (do we need it?)
+                        Edge new_edge = Edge{e, indices[i], indices[i + 1]};
                         edges.emplace_back(new_edge);
-//                      // increase e only if inserted in the vector
                         e++;
-                    }// end of if edge doesn't exist
-                } // end of iteration over indices
+                    }
+                }
+
+
+//                    if (!(std::count_if(edges.begin(), edges.end(), edge_exists(new_edge,edges)))) {
+//                        // if not in vector, add new edge
+//                        edges.emplace_back(new_edge);
+////                      // increase e only if inserted in the vector
+//                        e++;
+//                    }// end of if edge doesn't exist
+//                } // end of iteration over indices
 
 //                     create edge connecting begin to end
-                Edge new_edge = Edge{e, indices[-1], indices[0]};
+                int last_element = indices.size()-1;
+                std::pair<int, int> pair_edge_final(indices[last_element], indices[0]);
+                std::pair<int, int> pair_edge_final_reversed(indices[0], indices[last_element]);
+
+                bool checker2 = check_double_key(unordered_map_2, pair_edge_final);
+                bool checker22 = check_double_key(unordered_map_2, pair_edge_final_reversed);
                 // check if vector exists
-                if (!(std::count(edges.begin(), edges.end(), new_edge))) {
+                if (!(checker2) && !(checker22)) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
+                    //if (checker11==0){
+                    // insert it in the unordered map
+                    unordered_map_2[pair_edge_final] = e;
+                    //unordered_map_2.insert((indices[0], indices[1]),1);
+                    Edge new_edge = Edge{e, indices[last_element], indices[0]};
                     edges.emplace_back(new_edge);
+                }
+
+//                if (!(std::count(edges.begin(), edges.end(), new_edge))) {
+//                    edges.emplace_back(new_edge);
                       // increase e only if inserted in the vector
 
 //                if (indices.size() == 4) {
