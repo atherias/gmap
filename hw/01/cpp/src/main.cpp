@@ -157,6 +157,7 @@ int main(int argc, const char * argv[]) {
                     //unordered_map_2.insert((indices[0], indices[1]),1);
                     Edge new_edge = Edge{e, indices[last_element], indices[0]};
                     edges.emplace_back(new_edge);
+                    e++;
                 }
 
 //                if (!(std::count(edges.begin(), edges.end(), new_edge))) {
