@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
 //  std::string file_out_csv_3 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_volume.csv";
 
     // ## Read OBJ file ##
-    std::string file_in = "geo1004.2022/hw/01/data/cube.obj";
+    std::string file_in = "cube.obj";
 //    std::string file_out_obj = "/home/ravi/git/geo1004.2022/hw/01/data/cube_triangulated.obj";
 //    std::string file_out_csv_d = "/home/ravi/git/geo1004.2022/hw/01/data/cube_darts.csv";
 //    std::string file_out_csv_0 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_vertices.csv";
@@ -81,25 +81,26 @@ int main(int argc, const char * argv[]) {
                 // method that works for any polygon shape.
                 // create face
                 faces.emplace_back(Face{k, indices});
-                //add edges to edge vector
+
+                //iterate over indices, add edges to edge vector
                 for (i = 0; i < indices.size(); i++) {
                     // create edge
                     Edge new_edge = Edge{e, indices[i], indices[i + 1]};
-                    // check if vector exists
-                    if (!(std::count(edges.begin(), edges.end(), new_edge))) {
+                    // check if edge exists in vector - CHANGE TO UNORDERED MAP
+                    if (!(std::count_if(edges.begin(), edges.end(), edge_exists(new_edge,edges)))) {
+                        // if not in vector, add new edge
                         edges.emplace_back(new_edge);
 //                      // increase e only if inserted in the vector
                         e++;
-                    }
-                }
-                // create edge connecting begin to end
+                    }// end of if edge doesn't exist
+                } // end of iteration over indices
+
+//                     create edge connecting begin to end
                 Edge new_edge = Edge{e, indices[-1], indices[0]};
                 // check if vector exists
                 if (!(std::count(edges.begin(), edges.end(), new_edge))) {
                     edges.emplace_back(new_edge);
-//                      // increase e only if inserted in the vector
-
-
+                      // increase e only if inserted in the vector
 
 //                if (indices.size() == 4) {
 //                    //push vertices pointers to vertices vector, give an id in the face
@@ -141,19 +142,11 @@ int main(int argc, const char * argv[]) {
                     //increase k for increasing the id of faces
 
 //                }
-                } // end of if edge doesn't exist
-                k++;
+
+
+            k++;
             } // end of if face
         } // end of while loop
-
-
-
-
-
-
-
-
-
 
 
 //// ## Print to see the vertices are stored correctly
@@ -225,7 +218,7 @@ int main(int argc, const char * argv[]) {
     for (auto i = faces.begin(); i != faces.end(); ++i) {
         std::cout << "print faces" << std::endl;
         // Task: understand when it can print and when it cannot
-        std::cout << i->fid << " " << i->index_list[0] << std::endl;
+        std::cout << i->fid << " " << i->index_list[0] << i->index_list[1] << i->index_list[2] << i->index_list[3] << std::endl;
     }
     //print edges
     for (auto i = edges.begin(); i != edges.end(); ++i) {

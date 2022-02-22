@@ -36,8 +36,16 @@ Then you could create and link Darts like:
   dart_a->a0 = dart_b;
 */
 
+//bool edge_exists (Edge E, std::vector<Edge> edge_vector) {
+//    for (int index = 0; index < edge_vector.size(); index++) {
+//        if (E == edge_vector[index]){
+//        return true;
+//        }
+//    }
+//}
+
 struct Dart {
-//  // involutions:
+//  // involutions: should be pointers to other darts
 //  int a0;
 //  int a1;
 //  int a2;
@@ -77,12 +85,14 @@ struct Edge {
     int start;
     int end;
 
-    // comparison operator
+    // comparison operator - not working??
     bool operator==(const Edge &other) const{
         if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
             return true;
         }
     }
+
+
     // a dart incident to this Edge:
     // ...
 
