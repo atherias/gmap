@@ -104,7 +104,7 @@ int main(int argc, const char * argv[]) {
                 std::vector<int> indices;
                 std::vector<int> edge_indices;
                 // REMOVE 1 WHILE WE READ SO THAT WE DON'T HAVE IN OUR MINDS TO REMOVE IT EVERY TIME.
-                while (iss >> word) indices.push_back(std::stof(word)-1);
+                while (iss >> word) indices.push_back(std::stoi(word)-1);
                 // KEN said make it work for all types of shapes. What we know is every vertex will have two darts within a face.
 
                 // method that works for any polygon shape.
@@ -144,7 +144,7 @@ int main(int argc, const char * argv[]) {
                 bool checker2 = check_double_key(unordered_map_2, pair_edge_final);
                 bool checker22 = check_double_key(unordered_map_2, pair_edge_final_reversed);
                 // check if vector exists
-                if (!(checker2) && !(checker22)) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
+                if ((!(checker2)) && (!(checker22))) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
                     //if (checker11==0){
                     // insert it in the unordered map
                     unordered_map_2[pair_edge_final] = e;
@@ -211,31 +211,34 @@ int main(int argc, const char * argv[]) {
         // Create darts
         int dart_id = 0;
         int edge_it = 0;
-        int vol_id = 0;
+        int dart_vol = 0;
 
         //iterate over each face
         for (int d = 0; d<faces.size(); d++){
             // within each face, iterate over edges
             for (faces[d].edge_list[edge_it=0]; edge_it < faces[d].edge_list.size(); edge_it++){
-                // within each edge, get start and end
-//                int dart1_vertex = faces[d].edge_list[edge_it].start;
-
+                // within each edge, get start and end, create darts
                 int dart1_edge = faces[d].edge_list[edge_it];
                 int dart1_vertex = edges[dart1_edge].start;
                 int dart1_face = faces[d].fid;
 
-//                int dart2_vertex = faces[d].edge_list[edge_it].end;
                 int dart2_edge = faces[d].edge_list[edge_it];
                 int dart2_vertex = edges[dart1_edge].end;
-                int dart2_face = faces[d].fid;;
+                int dart2_face = faces[d].fid;
 
-                int dart_vol = 0;
-
-                Dart new_dart1({dart1_vertex, dart1_edge, dart1_face, dart_vol});
-                Dart new_dart2({dart2_vertex, dart2_edge, dart2_face, dart_vol});
+                Dart new_dart1({dart_id, dart1_vertex, dart1_edge, dart1_face, dart_vol});
+                dart_id++;
+                Dart new_dart2({dart_id, dart2_vertex, dart2_edge, dart2_face, dart_vol});
+                dart_id++;
                 darts.emplace_back(new_dart1);
                 darts.emplace_back(new_dart2);
             }
+        }
+
+        // add involutions to darts
+        for (int dart = 0; dart<darts.size(); dart++){
+            dart.a0 = ;
+
         }
 
 
@@ -267,11 +270,6 @@ int main(int argc, const char * argv[]) {
 //    }
 
 
-
-
-
-
-
         // ## Output generalised map to CSV ##
 
         // ## Create triangles from the darts ##
@@ -279,17 +277,23 @@ int main(int argc, const char * argv[]) {
         // ## Write triangles to obj ##
 
 
-    //print faces
-    for (auto i = faces.begin(); i != faces.end(); ++i) {
-        std::cout << "print faces" << std::endl;
+//    //print faces
+//    for (auto i = faces.begin(); i != faces.end(); ++i) {
+//        std::cout << "print faces" << std::endl;
+//        // Task: understand when it can print and when it cannot
+//        std::cout << i->fid << " " << i->index_list[0] << i->index_list[1] << i->index_list[2] << i->index_list[3] << std::endl;
+//    }
+//    //print edges
+//    for (auto i = edges.begin(); i != edges.end(); ++i) {
+//        std::cout << "print edges" << std::endl;
+//        // Task: understand when it can print and when it cannot
+//        std::cout << i->eid << " " << i->start << " " << i->end << std::endl;
+//    }
+    //print darts
+    for (auto i = darts.begin(); i != darts.end(); ++i) {
+        std::cout << "print darts" << std::endl;
         // Task: understand when it can print and when it cannot
-        std::cout << i->fid << " " << i->index_list[0] << i->index_list[1] << i->index_list[2] << i->index_list[3] << std::endl;
-    }
-    //print edges
-    for (auto i = edges.begin(); i != edges.end(); ++i) {
-        std::cout << "print edges" << std::endl;
-        // Task: understand when it can print and when it cannot
-        std::cout << i->eid << " " << i->start << " " << i->end << std::endl;
+        std::cout << i->dart_id << " " << i->face_id<< " " << i->edge_id << " " << i->vertex_id  << std::endl;
     }
         return 0;
 

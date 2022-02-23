@@ -47,16 +47,17 @@ Then you could create and link Darts like:
 struct Dart {
 
 //  // cells - ids that link to other tables?:
+  int dart_id;
   int vertex_id;
   int edge_id;
   int face_id;
   int volume_id;
 
 //  // involutions: should be pointers to other darts
-//  int a0;
-//  int a1;
-//  int a2;
-//  int a3;
+  Dart* a0;
+  Dart* a1;
+  Dart* a2;
+  Dart* a3;
 
 };
 
@@ -76,22 +77,21 @@ struct Vertex {
   {}
 
   // a dart incident to this Vertex:
-  // ...
+  // ... define like a method vertex.alpha0()
 
 };
 
 struct Edge {
     int eid;
-    // removed ampersand
     int start;
     int end;
 
-    // comparison operator - not working??
-    bool operator==(const Edge &other) const{
-        if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
-            return true;
-        }
-    }
+//    // comparison operator - not working??
+//    bool operator==(const Edge &other) const{
+//        if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
+//            return true;
+//        }
+//    }
 
 
     // a dart incident to this Edge:
