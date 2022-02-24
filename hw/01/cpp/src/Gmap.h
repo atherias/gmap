@@ -85,6 +85,7 @@ struct Edge {
     int eid;
     int start;
     int end;
+    int dart;
 
 //    // comparison operator - not working??
 //    bool operator==(const Edge &other) const{
