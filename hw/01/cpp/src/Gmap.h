@@ -54,10 +54,10 @@ struct Dart {
   int volume_id;
 
 //  // involutions: should be pointers to other darts
-  Dart* a0;
-  Dart* a1;
-  Dart* a2;
-  Dart* a3;
+  int a0;
+  int a1;
+  int a2;
+  int a3;
 
 };
 
@@ -105,6 +105,7 @@ struct Face {
     // the vertices of this face:
 public:
     int fid;
+    int dart;
     std::vector<int> index_list;
     std::vector<int> edge_list;
 

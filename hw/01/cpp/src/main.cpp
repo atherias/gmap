@@ -123,8 +123,8 @@ int main(int argc, const char * argv[]) {
                     std::pair<int, int> pair_edge11(indices[i + 1], indices[i]); //indices[0] , indices[1]
                     bool checker1 = check_double_key(unordered_map_2, pair_edge1);
                     bool checker11 = check_double_key(unordered_map_2, pair_edge11);
-//                    std::cout << "checker edge 1: " << checker1 << std::endl;
-// if both checkers are not true (edge is not found in either direction)
+
+                    // check if both checkers are not true (edge is not found in either direction) => create the edge and two darts
                     if ((!(checker1)) && (!(checker11))) {
                         // insert it in the unordered map
                         unordered_map_2[pair_edge1] = e;
@@ -135,11 +135,11 @@ int main(int argc, const char * argv[]) {
                         edges.emplace_back(new_edge);
 //                        edge_indices.emplace_back(new_edge.eid);
                         e++;
-                        Dart new_dart({dart_id, indices[i], e, k, 1});
+                        Dart new_dart({dart_id, indices[i], e, k, 1, dart_id+1});
                         darts.emplace_back(new_dart);
                         dart_id++;
 
-                        Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                        Dart new_dart1({dart_id, indices[i+1], e, k, 1, dart_id-1});
                         darts.emplace_back(new_dart1);
                         dart_id++;
                     }
@@ -155,11 +155,11 @@ int main(int argc, const char * argv[]) {
                                 int value_edge = unordered_map_2.at(pair_edge1);
                                 std::cout <<"Value from umap = " << unordered_map_2.at(pair_edge1) << std::endl;
                                 e = unordered_map_2.at(pair_edge1);
-                                Dart new_dart({dart_id, indices[i], e, k, 1});
+                                Dart new_dart({dart_id, indices[i], e, k, 1, dart_id+1});
                                 darts.emplace_back(new_dart);
                                 dart_id++;
 
-                                Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                                Dart new_dart1({dart_id, indices[i+1], e, k, 1, dart_id-1});
                                 darts.emplace_back(new_dart1);
                                 dart_id++;
 
@@ -170,11 +170,11 @@ int main(int argc, const char * argv[]) {
                                 int value_edge = unordered_map_2.at(pair_edge11);
                                 std::cout << "Value from umap = " << unordered_map_2.at(pair_edge11) << std::endl;
                                 e = unordered_map_2.at(pair_edge11);
-                                Dart new_dart({dart_id, indices[i], e, k, 1});
+                                Dart new_dart({dart_id, indices[i], e, k, 1, dart_id+1});
                                 darts.emplace_back(new_dart);
                                 dart_id++;
 
-                                Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                                Dart new_dart1({dart_id, indices[i+1], e, k, 1, dart_id-1});
                                 darts.emplace_back(new_dart1);
                                 dart_id++;
 
@@ -183,7 +183,7 @@ int main(int argc, const char * argv[]) {
                     } // end of else
                 } // end of iteration over the indices
 
-//                     create edge connecting begin to end
+//                     create edge connecting begin to end (4th edge of the face)
                 int last_element = indices.size()-1;
                 std::pair<int, int> pair_edge_final(indices[last_element], indices[0]);
                 std::pair<int, int> pair_edge_final_reversed(indices[0], indices[last_element]);
@@ -199,11 +199,11 @@ int main(int argc, const char * argv[]) {
                     edges.emplace_back(new_edge);
                     e++;
 
-                    Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                    Dart new_dart({dart_id, indices[last_element], e, k, 1, dart_id+1});
                     darts.emplace_back(new_dart);
                     dart_id++;
 
-                    Dart new_dart1({dart_id, indices[0], e, k, 1});
+                    Dart new_dart1({dart_id, indices[0], e, k, 1, dart_id-1});
                     darts.emplace_back(new_dart1);
                     dart_id++;
                 }
@@ -220,11 +220,11 @@ int main(int argc, const char * argv[]) {
                             std::cout <<"Value from umap = " << unordered_map_2.at(pair_edge_final) << std::endl;
                             e = unordered_map_2.at(pair_edge_final);
 
-                            Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                            Dart new_dart({dart_id, indices[last_element], e, k, 1, dart_id+1});
                             darts.emplace_back(new_dart);
                             dart_id++;
 
-                            Dart new_dart1({dart_id, indices[0], e, k, 1});
+                            Dart new_dart1({dart_id, indices[0], e, k, 1, dart_id-1});
                             darts.emplace_back(new_dart1);
                             dart_id++;
 
@@ -235,11 +235,11 @@ int main(int argc, const char * argv[]) {
                             int value_edge = unordered_map_2.at(pair_edge_final_reversed);
                             std::cout << "Value from umap = " << unordered_map_2.at(pair_edge_final_reversed) << std::endl;
                             e = unordered_map_2.at(pair_edge_final_reversed);
-                            Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                            Dart new_dart({dart_id, indices[last_element], e, k, 1, dart_id+1});
                             darts.emplace_back(new_dart);
                             dart_id++;
 
-                            Dart new_dart1({dart_id, indices[0], e, k, 1});
+                            Dart new_dart1({dart_id, indices[0], e, k, 1, dart_id-1});
                             darts.emplace_back(new_dart1);
                             dart_id++;
 
@@ -248,7 +248,10 @@ int main(int argc, const char * argv[]) {
                 } // end of else
 
                 // create face
-                faces.emplace_back(Face{k, indices, edge_indices});
+                faces.emplace_back(Face{k, dart_id});
+
+                // add involutions for all darts in current face
+
                 k++;
             } // end of if face
         } // end of while loop
@@ -342,9 +345,9 @@ int main(int argc, const char * argv[]) {
 //    }
     //print darts
     for (auto i = darts.begin(); i != darts.end(); ++i) {
-        std::cout << "print darts" << std::endl;
+//        std::cout << "print darts" << std::endl;
         // Task: understand when it can print and when it cannot
-        std::cout << i->dart_id << " " << i->face_id<< " " << i->edge_id << " " << i->vertex_id  << std::endl;
+        std::cout << i->dart_id << "| face= " << i->face_id<< "| edge = " << i->edge_id << "| vertex = " << i->vertex_id << "| a0= " << i->a0  << std::endl;
     }
         return 0;
 
