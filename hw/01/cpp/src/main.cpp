@@ -81,6 +81,9 @@ int main(int argc, const char * argv[]) {
     //iterator for indices
     int i;
 
+    //iterator for darts
+    int dart_id =1;
+
     if (stream_in.is_open()) {
         std::string line;
         // read file line by line
@@ -121,8 +124,8 @@ int main(int argc, const char * argv[]) {
                     bool checker1 = check_double_key(unordered_map_2, pair_edge1);
                     bool checker11 = check_double_key(unordered_map_2, pair_edge11);
 //                    std::cout << "checker edge 1: " << checker1 << std::endl;
-                    if ((!(checker1)) && (!(checker11))) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
-                        //if (checker11==0){
+// if both checkers are not true (edge is not found in either direction)
+                    if ((!(checker1)) && (!(checker11))) {
                         // insert it in the unordered map
                         unordered_map_2[pair_edge1] = e;
                         //unordered_map_2.insert((indices[0], indices[1]),1);
@@ -130,11 +133,55 @@ int main(int argc, const char * argv[]) {
                         // create the edge --> push it to the edges vector (do we need it?)
                         Edge new_edge = Edge{e, indices[i], indices[i + 1]};
                         edges.emplace_back(new_edge);
-                        edge_indices.emplace_back(new_edge.eid);
+//                        edge_indices.emplace_back(new_edge.eid);
                         e++;
-                    }
-                }
+                        Dart new_dart({dart_id, indices[i], e, k, 1});
+                        darts.emplace_back(new_dart);
+                        dart_id++;
 
+                        Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                        darts.emplace_back(new_dart1);
+                        dart_id++;
+                    }
+                    else{
+                        // LOGIC SAYS: every time we add an edge, or we don't add it but we retrieve its name from the unordered map, we create a DART.
+                        // here, the Edge IS IN the MAP, so firstly we retrieve its name, then we create the dart.
+
+                        // we are missing e! we have to find it. we are retrieving it from the unordered map.
+
+
+                        if (checker1) {
+                            if (unordered_map_2.at(pair_edge1)) {
+                                int value_edge = unordered_map_2.at(pair_edge1);
+                                std::cout <<"Value from umap = " << unordered_map_2.at(pair_edge1) << std::endl;
+                                e = unordered_map_2.at(pair_edge1);
+                                Dart new_dart({dart_id, indices[i], e, k, 1});
+                                darts.emplace_back(new_dart);
+                                dart_id++;
+
+                                Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                                darts.emplace_back(new_dart1);
+                                dart_id++;
+
+                            }
+                        }
+                        if (checker11) {
+                            if (unordered_map_2.at(pair_edge11)) {
+                                int value_edge = unordered_map_2.at(pair_edge11);
+                                std::cout << "Value from umap = " << unordered_map_2.at(pair_edge11) << std::endl;
+                                e = unordered_map_2.at(pair_edge11);
+                                Dart new_dart({dart_id, indices[i], e, k, 1});
+                                darts.emplace_back(new_dart);
+                                dart_id++;
+
+                                Dart new_dart1({dart_id, indices[i+1], e, k, 1});
+                                darts.emplace_back(new_dart1);
+                                dart_id++;
+
+                            }
+                        }
+                    } // end of else
+                } // end of iteration over the indices
 
 //                     create edge connecting begin to end
                 int last_element = indices.size()-1;
@@ -144,57 +191,61 @@ int main(int argc, const char * argv[]) {
                 bool checker2 = check_double_key(unordered_map_2, pair_edge_final);
                 bool checker22 = check_double_key(unordered_map_2, pair_edge_final_reversed);
                 // check if vector exists
-                if ((!(checker2)) && (!(checker22))) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
-                    //if (checker11==0){
+                if ((!(checker2)) && (!(checker22))) {
                     // insert it in the unordered map
                     unordered_map_2[pair_edge_final] = e;
                     //unordered_map_2.insert((indices[0], indices[1]),1);
                     Edge new_edge = Edge{e, indices[last_element], indices[0]};
                     edges.emplace_back(new_edge);
                     e++;
+
+                    Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                    darts.emplace_back(new_dart);
+                    dart_id++;
+
+                    Dart new_dart1({dart_id, indices[0], e, k, 1});
+                    darts.emplace_back(new_dart1);
+                    dart_id++;
                 }
+                else{
+                    // LOGIC SAYS: every time we add an edge, or we don't add it but we retrieve its name from the unordered map, we create a DART.
+                    // here, the Edge IS IN the MAP, so firstly we retrieve its name, then we create the dart.
+
+                    // we are missing e! we have to find it. we are retrieving it from the unordered map.
 
 
-//                if (indices.size() == 4) {
-//                    //push vertices pointers to vertices vector, give an id in the face
-//                    // store vertices instead, not pointers, maybe just remove AMPERSAND.
-//                    faces.emplace_back(Face{k,((int) indices[0]), ((int) indices[1]), ((int) indices[2]), ((int) indices[3]),
-//                                            vertices[indices[0]-1], vertices[indices[1]-1], vertices[indices[2]-1],
-//                                            vertices[indices[3]-1]});
-//
-//                    //create edges // possibly do it with unordered_map
-//                    // removed the ampersand, KEEP ALWAYS THE INDICES
-//                    Edge new_edge1 =Edge{e, indices[0], indices[1]};
-//                    bool wtfq = std::count(edges.begin(),edges.end(),new_edge1);
-////                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
-////                        edges.emplace_back(new_edge1);
-////                        // increase e only if inserted in the vector
-////                        e++;
-////                    }
-//
-//                    Edge new_edge2 =Edge{e, indices[1], indices[2]};
-//                    bool wtf = std::count(edges.begin(),edges.end(),new_edge2);
-//
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge2))){
-//                        edges.emplace_back(new_edge2);
-//                        e++;
-//                    }
-//
-//                    Edge new_edge3 =Edge{e, indices[2], indices[3]};
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge3))){
-//                        edges.emplace_back(new_edge3);
-//                        e++;
-//                    }
-//
-//                    Edge new_edge4 =Edge{e, indices[3], indices[0]};
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge4))){
-//                        edges.emplace_back(new_edge4);
-//                        e++;
-//                    }
+                    if (checker2) {
+                        if (unordered_map_2.at(pair_edge_final)) {
+                            int value_edge = unordered_map_2.at(pair_edge_final);
+                            std::cout <<"Value from umap = " << unordered_map_2.at(pair_edge_final) << std::endl;
+                            e = unordered_map_2.at(pair_edge_final);
 
-                    //increase k for increasing the id of faces
-//                }
+                            Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                            darts.emplace_back(new_dart);
+                            dart_id++;
 
+                            Dart new_dart1({dart_id, indices[0], e, k, 1});
+                            darts.emplace_back(new_dart1);
+                            dart_id++;
+
+                        }
+                    }
+                    if (checker22) {
+                        if (unordered_map_2.at(pair_edge_final_reversed)) {
+                            int value_edge = unordered_map_2.at(pair_edge_final_reversed);
+                            std::cout << "Value from umap = " << unordered_map_2.at(pair_edge_final_reversed) << std::endl;
+                            e = unordered_map_2.at(pair_edge_final_reversed);
+                            Dart new_dart({dart_id, indices[last_element], e, k, 1});
+                            darts.emplace_back(new_dart);
+                            dart_id++;
+
+                            Dart new_dart1({dart_id, indices[0], e, k, 1});
+                            darts.emplace_back(new_dart1);
+                            dart_id++;
+
+                        }
+                    }
+                } // end of else
 
                 // create face
                 faces.emplace_back(Face{k, indices, edge_indices});
@@ -208,38 +259,38 @@ int main(int argc, const char * argv[]) {
         std::cout << "file not open" << std::endl;
     }
 
-        // Create darts
-        int dart_id = 0;
-        int edge_it = 0;
-        int dart_vol = 0;
-
-        //iterate over each face
-        for (int d = 0; d<faces.size(); d++){
-            // within each face, iterate over edges
-            for (faces[d].edge_list[edge_it=0]; edge_it < faces[d].edge_list.size(); edge_it++){
-                // within each edge, get start and end, create darts
-                int dart1_edge = faces[d].edge_list[edge_it];
-                int dart1_vertex = edges[dart1_edge].start;
-                int dart1_face = faces[d].fid;
-
-                int dart2_edge = faces[d].edge_list[edge_it];
-                int dart2_vertex = edges[dart1_edge].end;
-                int dart2_face = faces[d].fid;
-
-                Dart new_dart1({dart_id, dart1_vertex, dart1_edge, dart1_face, dart_vol});
-                dart_id++;
-                Dart new_dart2({dart_id, dart2_vertex, dart2_edge, dart2_face, dart_vol});
-                dart_id++;
-                darts.emplace_back(new_dart1);
-                darts.emplace_back(new_dart2);
-            }
-        }
-
-        // add involutions to darts
-        for (int dart = 0; dart<darts.size(); dart++){
-            dart.a0 = ;
-
-        }
+//        // Create darts
+//        int dart_id = 0;
+//        int edge_it = 0;
+//        int dart_vol = 0;
+//
+//        //iterate over each face
+//        for (int d = 0; d<faces.size(); d++){
+//            // within each face, iterate over edges
+//            for (faces[d].edge_list[edge_it=0]; edge_it < faces[d].edge_list.size(); edge_it++){
+//                // within each edge, get start and end, create darts
+//                int dart1_edge = faces[d].edge_list[edge_it];
+//                int dart1_vertex = edges[dart1_edge].start;
+//                int dart1_face = faces[d].fid;
+//
+//                int dart2_edge = faces[d].edge_list[edge_it];
+//                int dart2_vertex = edges[dart1_edge].end;
+//                int dart2_face = faces[d].fid;
+//
+//                Dart new_dart1({dart_id, dart1_vertex, dart1_edge, dart1_face, dart_vol});
+//                dart_id++;
+//                Dart new_dart2({dart_id, dart2_vertex, dart2_edge, dart2_face, dart_vol});
+//                dart_id++;
+//                darts.emplace_back(new_dart1);
+//                darts.emplace_back(new_dart2);
+//            }
+//        }
+//
+//        // add involutions to darts
+//        for (int dart = 0; dart<darts.size(); dart++){
+//            dart.a0 = ;
+//
+//        }
 
 
         // Triangulation:
