@@ -69,6 +69,7 @@ int main(int argc, const char * argv[]) {
     std::vector<Face> faces;
     std::vector<Edge> edges;
     std::vector<Dart> darts;
+    std::vector<Dart> darts_face;
     std::unordered_map<pair , int, pair_hash > unordered_map_2 = { }; // initialize the un_map empty
 
 
@@ -83,6 +84,9 @@ int main(int argc, const char * argv[]) {
 
     //iterator for darts
     int dart_id =1;
+
+    //iterator for vertices
+    int vertex_id =1;
 
     if (stream_in.is_open()) {
         std::string line;
@@ -99,11 +103,15 @@ int main(int argc, const char * argv[]) {
                 // iterate over each word in the line add coordinates to coordinates vector
                 while (iss >> word) coordinates.push_back(std::stof(word));
                 // once all coordinates added, add vertex to vertices vector
-                if (coordinates.size() == 3) vertices.emplace_back(coordinates[0], coordinates[1], coordinates[2]);
-                else vertices.push_back(Vertex());
+                Vertex vertex = Vertex(coordinates[0], coordinates[1], coordinates[2]);
+                vertex.vertex_id = vertex_id;
+                vertices.emplace_back(vertex);
+                vertex_id++;
             }
                 // check if this is a vertex line
             else if (word == "f") {
+                // create face
+                faces.emplace_back(Face{k, dart_id});
                 std::vector<int> indices;
                 std::vector<int> edge_indices;
                 // REMOVE 1 WHILE WE READ SO THAT WE DON'T HAVE IN OUR MINDS TO REMOVE IT EVERY TIME.
@@ -134,14 +142,24 @@ int main(int argc, const char * argv[]) {
                         Edge new_edge = Edge{e, indices[i], indices[i + 1], dart_id};
                         edges.emplace_back(new_edge);
 //                        edge_indices.emplace_back(new_edge.eid);
-                        e++;
+
                         Dart new_dart({dart_id, indices[i], e, k, 1, dart_id+1});
                         darts.emplace_back(new_dart);
+                        // add the dart to the darts_face
+                        darts_face.emplace_back(new_dart);
+                        // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                        (vertices[indices[i]]).dart_id = dart_id;
+
                         dart_id++;
 
                         Dart new_dart1({dart_id, indices[i+1], e, k, 1, dart_id-1});
                         darts.emplace_back(new_dart1);
+                        darts_face.emplace_back(new_dart1);
+                        // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                        (vertices[indices[i]]).dart_id = dart_id;
+
                         dart_id++;
+                        e++;
                     }
                     else{
                         // LOGIC SAYS: every time we add an edge, or we don't add it but we retrieve its name from the unordered map, we create a DART.
@@ -157,10 +175,18 @@ int main(int argc, const char * argv[]) {
                                 int e_existing = unordered_map_2.at(pair_edge1);
                                 Dart new_dart({dart_id, indices[i], e_existing, k, 1, dart_id+1});
                                 darts.emplace_back(new_dart);
+                                darts_face.emplace_back(new_dart);
+                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                                (vertices[indices[i]]).dart_id = dart_id;
+
                                 dart_id++;
 
                                 Dart new_dart1({dart_id, indices[i+1], e_existing, k, 1, dart_id-1});
                                 darts.emplace_back(new_dart1);
+                                darts_face.emplace_back(new_dart1);
+                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                                (vertices[indices[i]]).dart_id = dart_id;
+
                                 dart_id++;
 
                             }
@@ -172,10 +198,18 @@ int main(int argc, const char * argv[]) {
                                 int e_existing = unordered_map_2.at(pair_edge11);
                                 Dart new_dart({dart_id, indices[i], e_existing, k, 1, dart_id+1});
                                 darts.emplace_back(new_dart);
+                                darts_face.emplace_back(new_dart);
+                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                                (vertices[indices[i]]).dart_id = dart_id;
+
                                 dart_id++;
 
                                 Dart new_dart1({dart_id, indices[i+1], e_existing, k, 1, dart_id-1});
                                 darts.emplace_back(new_dart1);
+                                darts_face.emplace_back(new_dart1);
+                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                                (vertices[indices[i]]).dart_id = dart_id;
+
                                 dart_id++;
 
                             }
@@ -197,15 +231,24 @@ int main(int argc, const char * argv[]) {
                     //unordered_map_2.insert((indices[0], indices[1]),1);
                     Edge new_edge = Edge{e, indices[last_element], indices[0],dart_id};
                     edges.emplace_back(new_edge);
-                    e++;
+
 
                     Dart new_dart({dart_id, indices[last_element], e, k, 1, dart_id+1});
                     darts.emplace_back(new_dart);
+                    darts_face.emplace_back(new_dart);
+                    // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                    (vertices[indices[i]]).dart_id = dart_id;
+
                     dart_id++;
 
                     Dart new_dart1({dart_id, indices[0], e, k, 1, dart_id-1});
                     darts.emplace_back(new_dart1);
+                    darts_face.emplace_back(new_dart1);
+                    // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                    (vertices[indices[i]]).dart_id = dart_id;
+
                     dart_id++;
+                    e++;
                 }
                 else{
                     // LOGIC SAYS: every time we add an edge, or we don't add it but we retrieve its name from the unordered map, we create a DART.
@@ -222,10 +265,18 @@ int main(int argc, const char * argv[]) {
 
                             Dart new_dart({dart_id, indices[last_element], e_existing, k, 1, dart_id+1});
                             darts.emplace_back(new_dart);
+                            darts_face.emplace_back(new_dart);
+                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                            (vertices[indices[i]]).dart_id = dart_id;
+
                             dart_id++;
 
                             Dart new_dart1({dart_id, indices[0], e_existing, k, 1, dart_id-1});
                             darts.emplace_back(new_dart1);
+                            darts_face.emplace_back(new_dart1);
+                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                            (vertices[indices[i]]).dart_id = dart_id;
+
                             dart_id++;
 
                         }
@@ -237,20 +288,41 @@ int main(int argc, const char * argv[]) {
                             int e_existing = unordered_map_2.at(pair_edge_final_reversed);
                             Dart new_dart({dart_id, indices[last_element], e_existing, k, 1, dart_id+1});
                             darts.emplace_back(new_dart);
+                            darts_face.emplace_back(new_dart);
+                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                            (vertices[indices[i]]).dart_id = dart_id;
+
                             dart_id++;
 
                             Dart new_dart1({dart_id, indices[0], e_existing, k, 1, dart_id-1});
                             darts.emplace_back(new_dart1);
+                            darts_face.emplace_back(new_dart1);
+                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
+                            (vertices[indices[i]]).dart_id = dart_id;
+
                             dart_id++;
 
                         }
                     }
                 } // end of else
 
-                // create face
-                faces.emplace_back(Face{k, dart_id});
+// add involutions for alpha 1 on current face
 
-                // add involutions for all darts in current face
+
+//                for (auto d : darts){
+//                    for (auto j:darts_face){
+//                        if (d.face_id == j.face_id){
+//                            if (d.vertex_id == j.vertex_id){
+//                                if (d.edge_id != j.edge_id){
+////                                    Dart* pd = &d;
+//                                    int involution = j.dart_id;
+//                                    d.a1 = involution;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                darts_face.clear();
 
                 k++;
             } // end of if face
@@ -338,6 +410,15 @@ int main(int argc, const char * argv[]) {
         std::cout << j->fid << "| dart=" << j->dart << std::endl;
     }
     std::cout << " " << std::endl;
+    //print vertices
+    std::cout << "print vertices" << std::endl;
+    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
+        // Task: understand when it can print and when it cannot
+        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
+                  << "| z = " << j->point.z << std::endl;
+
+    }
+    std::cout << " " << std::endl;
     //print edges
     std::cout << "print edges" << std::endl;
     for (auto j = edges.begin(); j != edges.end(); ++j) {
@@ -349,7 +430,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "print darts" << std::endl;
     for (auto j = darts.begin(); j != darts.end(); ++j) {
         // Task: understand when it can print and when it cannot
-        std::cout << j->dart_id << "| face= " << j->face_id<< "| edge = " << j->edge_id << "| vertex = " << j->vertex_id << "| a0= " << j->a0  << std::endl;
+        std::cout << j->dart_id << "| face= " << j->face_id<< "| edge = " << j->edge_id << "| vertex = " << j->vertex_id << "| a0= " << j->a0  << "| a1= " << j->a1  << std::endl;
     }
         return 0;
 

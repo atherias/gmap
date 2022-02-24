@@ -47,6 +47,7 @@ Then you could create and link Darts like:
 struct Dart {
 
 //  // cells - ids that link to other tables?:
+public:
   int dart_id;
   int vertex_id;
   int edge_id;
@@ -62,8 +63,10 @@ struct Dart {
 };
 
 struct Vertex {
-    // vertex id
-//    char vertex_id;
+     //vertex id
+    int vertex_id;
+    //dart id
+    int dart_id;
 
   // the coordinates of this vertex:
   Point point;
