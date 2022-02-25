@@ -27,6 +27,8 @@ sstream
 -
 algorithm
 -
+iomanip
+-
 Gmap.h
 /mnt/c/Users/Adele/Documents/TU-Delft/Q3/GEO1004_3D-Modelling/geo1004.2022/hw/01/cpp/src/Gmap.h
 typeinfo

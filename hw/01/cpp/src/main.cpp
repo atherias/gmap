@@ -6,12 +6,13 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 #include "Gmap.h"
 #include <typeinfo>
 
-//function to get midpoint of an edge
-        Point midpoint_edge(Vertex one, Vertex two){
+// to be used for triangulation, otherwise DELETE
+Point midpoint_edge(Vertex one, Vertex two){
 float x = (one.point[0] + two.point[0]) / 2;
 float y = (one.point[1] + two.point[1]) / 2;
 float z = (one.point[2] + two.point[2]) / 2;
@@ -21,9 +22,6 @@ return {x,y,z};
 //## Unordered Map ##
 // definition of pair
 typedef std::pair<int, int> pair;
-
-// initialize an empty unordered map
-std::unordered_map<pair, int, pair_hash> unordered_map_2 = {};
 
 // function that passes a pair as a key and checks whether this key already exists in the unordered map
 bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
@@ -36,49 +34,45 @@ bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
     }
 }
 
-// is this needed??
-// FUNCTION TO PASS BY REFERENCE SO WE ASSIGN A VALUE :
-void assign_dart_id(Dart *n, Dart o){
-    (*n).a1 = o.dart_id;
-}
-
 int main(int argc, const char * argv[]) {
-//  std::string file_in = "torus.obj";
-//  std::string file_out_obj = "/home/ravi/git/geo1004.2022/hw/01/data/torus_triangulated.obj";
-//  std::string file_out_csv_d = "/home/ravi/git/geo1004.2022/hw/01/data/torus_darts.csv";
-//  std::string file_out_csv_0 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_vertices.csv";
-//  std::string file_out_csv_1 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_edges.csv";
-//  std::string file_out_csv_2 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_faces.csv";
-//  std::string file_out_csv_3 = "/home/ravi/git/geo1004.2022/hw/01/data/torus_volume.csv";
 
-    // ##Define input and output files##
-    std::string file_in = "cube.obj";
-//    std::string file_out_obj = "/home/ravi/git/geo1004.2022/hw/01/data/cube_triangulated.obj";
-//    std::string file_out_csv_d = "/home/ravi/git/geo1004.2022/hw/01/data/cube_darts.csv";
-//    std::string file_out_csv_0 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_vertices.csv";
-//    std::string file_out_csv_1 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_edges.csv";
-//    std::string file_out_csv_2 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_faces.csv";
-//    std::string file_out_csv_3 = "/home/ravi/git/geo1004.2022/hw/01/data/cube_volume.csv";
+    // ## Define input and output files ##
+    std::string file_in = "torus.obj";
+    std::string file_out_obj = "torus_triangulated.obj";
+    std::string file_out_csv_d = "torus_darts.csv";
+    std::string file_out_csv_0 = "torus_vertices.csv";
+    std::string file_out_csv_1 = "torus_edges.csv";
+    std::string file_out_csv_2 = "torus_faces.csv";
+    std::string file_out_csv_3 = "torus_volume.csv";
 
-// create vectors to hold each structure type
+
+    // create vectors to hold each structure type
     std::vector<Vertex> vertices;
     std::vector<Face> faces;
     std::vector<Edge> edges;
     std::vector<Dart> darts;
+    std::vector<Volume> volumes;
 
+    std::unordered_map<pair, int, pair_hash> unordered_map_2 = {}; // initialize the un_map empty
 
     //Initialize iterators to be used in loops
     // for faces
     int k = 1;
-    //for edges
+    // for edges
     int e = 1;
-    //for vertex indices
+    // for vertex indices
     int i;
-    // for dart_id
+    // for dart id
     int dart_id = 1;
     // for vertices
     int vertex_id = 1;
 
+
+    // instantiate volume and add to volume vector (only one volume in this assignment)
+    Volume volume1 = {1, 1};
+    volumes.emplace_back(volume1);
+
+    // ## Read OBJ file ##
     // ## Read vertices + faces from an obj file:
     std::ifstream stream_in;
     stream_in.open(file_in);
@@ -89,18 +83,17 @@ int main(int argc, const char * argv[]) {
             std::string word;
             iss >> word;
 
-            // If line begins with "v", instantiate a vertex and add it to vertices vector
+            // If line begins with "v",  instantiate a vertex and add it to vertices vector
             if (word == "v") {
                 std::vector<float> coordinates;
                 while (iss >> word) coordinates.push_back(std::stof(word));
                 // check if the vertex has 3 coordinates, otherwise create empty point
-                if (coordinates.size() == 3){
+                if (coordinates.size() == 3) {
                     Vertex vertex = Vertex(coordinates[0], coordinates[1], coordinates[2]);
                     vertex.vertex_id = vertex_id;
                     vertices.emplace_back(vertex);
                     vertex_id++;
-                }
-                else vertices.push_back(Vertex());
+                } else vertices.push_back(Vertex());
             }
             // If line begins with "f", instantiate a face and add to faces vector, assign the current dart_id:
             if (word == "f") {
@@ -134,7 +127,8 @@ int main(int argc, const char * argv[]) {
                     if ((!(checker1)) && (!(checker11))) {
                         // insert the pair in the unordered map, instantiate the new edge and add to edges vector
                         unordered_map_2[pair_edge1] = e;
-                        edges.emplace_back(Edge{e, indices[i], indices[i + 1], dart_id});
+                        Edge new_edge = Edge{e, indices[i], indices[i + 1], dart_id};
+                        edges.emplace_back(new_edge);
 
                         // create first dart that corresponds to this new edge, add it to the darts vector and the darts_face vector
                         Dart new_dart({dart_id, indices[i] + 1, e, k, 1, dart_id + 1});
@@ -153,14 +147,14 @@ int main(int argc, const char * argv[]) {
 
                         // increment e: this will be the next edge_id
                         e++;
+
                     }
 
-                    // if the edge does not already exist, only create the darts that correspond to it on the current face
+                        // if the edge does not already exist, only create the darts that correspond to it on the current face
                     else {
                         // find the edge_id of the current edge by retrieving it from the unordered map
                         // the order of the vertices defining the start and end of the edge matter, therefore find which pair exists in the map
                         if (checker1) {
-                            // ARE BOTH IFs NECESSARY?
                             if (unordered_map_2.at(pair_edge1)) {
                                 // retrieve index of the pair in the map, create a new dart using the retrieved edge id
                                 // add to darts vector and darts face vector
@@ -187,6 +181,7 @@ int main(int argc, const char * argv[]) {
                                 // add to darts vector and darts face vector
                                 // for each dart created, assign dart_id to the first vertex used to create the dart, increment dart_id
                                 int e_existing = unordered_map_2.at(pair_edge11);
+
 
                                 Dart new_dart({dart_id, indices[i] + 1, e_existing, k, 1, dart_id + 1});
                                 darts.emplace_back(new_dart);
@@ -218,6 +213,7 @@ int main(int argc, const char * argv[]) {
                 bool checker2 = check_double_key(unordered_map_2, pair_edge_final);
                 bool checker22 = check_double_key(unordered_map_2, pair_edge_final_reversed);
 
+
                 // check if both checkers return False: this means the edge does not already exist in the unordered map
                 if (!(checker2) && !(checker22)) {
                     unordered_map_2[pair_edge_final] = e;
@@ -236,8 +232,7 @@ int main(int argc, const char * argv[]) {
                     dart_id++;
 
                     e++;
-                }
-                else {
+                } else {
                     // find the edge_id of the current edge by retrieving it from the unordered map
                     // the order of the vertices defining the start and end of the edge matter, therefore find which pair exists in the map
                     if (checker2) {
@@ -259,9 +254,6 @@ int main(int argc, const char * argv[]) {
                     }
                     if (checker22) {
                         if (unordered_map_2.at(pair_edge_final_reversed)) {
-                            // UNECESSARY VALUE EDGE?
-                            int value_edge = unordered_map_2.at(pair_edge_final_reversed);
-
                             int e_existing = unordered_map_2.at(pair_edge_final_reversed);
 
                             Dart new_dart({dart_id, indices[last_element] + 1, e_existing, k, 1, dart_id + 1});
@@ -271,8 +263,6 @@ int main(int argc, const char * argv[]) {
                             dart_id++;
 
                             Dart new_dart1({dart_id, indices[0] + 1, e_existing, k, 1, dart_id - 1});
-                            // NO MEANING IN THIS ASSIGNMENT BUT IT IS PRINTED IN THE END. --> new_dart1.a1 = 2;
-                            //I don't understand the comment above
                             darts.emplace_back(new_dart1);
                             darts_face.emplace_back(new_dart1);
                             dart_id++;
@@ -282,21 +272,27 @@ int main(int argc, const char * argv[]) {
                 } // end of else
                 // --- -----------  ------ - END OF LAST EDGE --- ---  ---- --- --- --- --- -  - - - -
 
+                // THE PROBLEM is solved. CANNOT ASSIGNE VALUES. SOS -- S0S -- S0S --> DIFFERENCE WITH for (auto d: darts)
+                // https://stackoverflow.com/questions/51954966/iterate-through-a-vector-of-objects-and-find-a-variable-that-matches-one-pulled
+
+
                 // ## GET ALPHA 1 ##
                 // Iterate over all darts in the darts vector
                 // find a dart from the current face that has the same face id and vertex id but different edge id
                 // the id of the dart that satisfies these conditions is the result of involution alpha 1
-                for (auto d = darts.begin(); d != darts.end(); d++){
-                    for (auto j: darts_face){
-                        if (d->face_id == j.face_id){
-                            if (d->vertex_id == j.vertex_id){
-                                if (d->edge_id != j.edge_id){
+                for (auto d = darts.begin(); d != darts.end(); d++) {
+                    for (auto j: darts_face) {
+                        if (d->face_id == j.face_id) {
+                            if (d->vertex_id == j.vertex_id) {
+                                if (d->edge_id != j.edge_id) {
                                     d->a1 = j.dart_id;
                                 }
                             }
                         }
                     }
                 }
+
+
 
                 // increment k before moving to the next face and clear the vector of darts for the current face
                 k++;
@@ -307,11 +303,12 @@ int main(int argc, const char * argv[]) {
         // AFTER READING THE FILE
         // ## GET ALPHA 2 ##
         /* find alpha 2 for every dart by searching for another dart in any other face, with the same 0-cell and 1-cell */
-        for (auto dd = darts.begin(); dd != darts.end(); dd++){
-            for (auto dj: darts){
-                if (dd->vertex_id == dj.vertex_id){
-                    if (dd->edge_id == dj.edge_id){
-                        if (dd->face_id != dj.face_id){
+        for (auto dd = darts.begin(); dd != darts.end(); dd++) {
+            dd->a3 = '-';
+            for (auto dj: darts) {
+                if (dd->vertex_id == dj.vertex_id) {
+                    if (dd->edge_id == dj.edge_id) {
+                        if (dd->face_id != dj.face_id) {
                             dd->a2 = dj.dart_id;
                         }
                     }
@@ -322,60 +319,98 @@ int main(int argc, const char * argv[]) {
     } // here we close the FILE --> END
 
 
+    // PRINTING DARTS, FACES, EDGES, VERTICES --- --- --- --- --- ---
     //print faces
-    std::cout << "print faces" << std::endl;
-    for (auto j = faces.begin(); j != faces.end(); ++j) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j->fid << "| d" << j->dart << std::endl;
-    }
-    std::cout << " " << std::endl;
-    //print edges
-    std::cout << "print edges" << std::endl;
-    for (auto j = edges.begin(); j != edges.end(); ++j) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j->eid << "| d=" << j->dart << std::endl;
-    }
+//    std::cout << "print faces" << std::endl;
+//    for (auto j = faces.begin(); j != faces.end(); ++j) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j->fid << "| d" << j->dart << std::endl;
+//    }
+//    std::cout << " " << std::endl;
+//    //print edges
+//    std::cout << "print edges" << std::endl;
+//    for (auto j = edges.begin(); j != edges.end(); ++j) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j->eid << "| d=" << j->dart << std::endl;
+//    }
+//
+//    std::cout << " " << std::endl;
+//    //print vertices
+//    std::cout << "print vertices" << std::endl;
+//    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
+//                  << "| z = " << j->point.z << std::endl;
+//
+//    }
+//    std::cout << " " << std::endl;
+//    //print darts
+//    std::cout << "print darts" << std::endl;
+//    for (auto j = darts.begin(); j != darts.end(); ++j) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j->dart_id << " | a0= " << j->a0 << " | a1= " << j->a1 << " | a2= " << j->a2 << " | v"
+//                  << j->vertex_id << " | e"
+//                  << j->edge_id << " | f" << j->face_id << std::endl;
+//    }
 
-    std::cout << " " << std::endl;
-    //print vertices
-    std::cout << "print vertices" << std::endl;
-    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
-                  << "| z = " << j->point.z << std::endl;
 
-    }
-    std::cout << " " << std::endl;
-    //print darts
-    std::cout << "print darts" << std::endl;
-    for (auto j = darts.begin(); j != darts.end(); ++j) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j->dart_id << " | a0= " << j->a0 << " | a1= " << j->a1 << " | a2= "  << j-> a2 << " | v" << j->vertex_id << " | e"
-                  << j->edge_id << " | f" << j->face_id << std::endl;
-    }
-
-
-
+    // --- --- --- --- --- --- OUTPUTS CSV FILES --- --- --- --- --- ---
 
     // ## Output generalised map to CSV ##
 
-    // ## Create triangles from the darts ##
+    // ## 1) output darts.csv file ##
+    std::ofstream stream_out1;
+    stream_out1.open(file_out_csv_d);
+    stream_out1 << "id;a0;a1;a2;v;e;f;v" << std::endl;
+    for (auto j = darts.begin(); j != darts.end(); ++j) {
+        stream_out1 << j->dart_id << ";" << j->a0 << ";" << j->a1 << ";" << j->a2 << ";" << j->a3 << ";" << j->vertex_id << ";"
+                    << j->edge_id << ";" << j->face_id << ";" << 1 << std::endl;
+    }
 
-    // ## Write triangles to obj ##
+    // ## 2) output vertices.csv file ##
+    std::ofstream stream_out2;
+    stream_out2.open(file_out_csv_0);
+    stream_out2 << "id;dart;x;y;z" << std::endl;
+    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
+        stream_out2 << j->vertex_id << ";" << j->dart_id << ";" << j->point.x << ";" << j->point.y << ";" << j->point.z
+                << std::setprecision(2) << std::fixed << std::endl;
+    }
 
-    return 0;
+    // ## 3) output edges.csv file ##
+    std::ofstream stream_out3;
+    stream_out3.open(file_out_csv_1);
+    stream_out3 << "id;dart" << std::endl;
+    for (auto j = edges.begin(); j != edges.end(); ++j) {
+        stream_out3 << j->eid << ";" << j->dart << std::endl;
+    }
+
+    // ## 4) output faces.csv file ##
+    std::ofstream stream_out4;
+    stream_out4.open(file_out_csv_2);
+    stream_out4 << "id;dart" << std::endl;
+    for (auto j = faces.begin(); j != faces.end(); ++j) {
+        stream_out4 << j->fid << ";" << j->dart << std::endl;
+    }
+
+    // ## 5) output volume.csv file ##
+    std::ofstream stream_out5;
+    stream_out5.open(file_out_csv_3);
+    stream_out5 << "id;dart" << std::endl;
+    for (auto j = volumes.begin(); j != volumes.end(); ++j) {
+        stream_out5 << j->vid << ";" << j->dart << std::endl;
+
+
+        // --- --- --- --- TRIANGULATION --- --- --- ---
+
+        // ## Create triangles from the darts ##
+
+        // ## Write triangles to obj ##
+
+        return 0;
+    }
 }
 
-
-
-
-
-
-
-
-
-
-// notes
+// notes --- TO BE DELETED IN THE END --- ---
 
 
 //                    // Just Print CONTENTS OF THE UNORDERED MAP
@@ -420,8 +455,6 @@ int main(int argc, const char * argv[]) {
 //                        edges.emplace_back(new_edge4);
 //                        e++;
 //                    }
-
-
 
 
 //// ## Print to see the vertices are stored correctly

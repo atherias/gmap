@@ -9,29 +9,8 @@ struct Edge;
 struct Face;
 struct Volume;
 
-/*
-Below you find the basic elements that you need to build the generalised map.
-The main thing you need to fill out are the links between the elements:
-  * the involutions and cells on the Dart
-  * the darts on the cells
-One way to do this is by using pointers. eg. define a member on the dart struct like
-  Struct Dart {
-    // involutions:
-    Dart* a0 = nullptr;
-    // ...
-    // cells:
-    // ...
-
-  };
-Then you could create and link Darts like:
-
-  Dart* dart_a = new Dart();
-  Dart* dart_b = new Dart();
-  dart_a->a0 = dart_b;
-*/
-
 struct Dart {
-// cells - ids that link to other tables
+// cells - ids of cells that form the dart
     int dart_id;
     int vertex_id;
     int edge_id;
@@ -42,22 +21,15 @@ struct Dart {
     int a0;
     int a1;
     int a2;
-    int a3;
-
-    // involutions:
-    // ..
-
-    // cells:
-    // ...
-
+    char a3;
 };
 
 struct Vertex {
     // the coordinates of this vertex:
     Point point;
-
-    // vertex id
+    // unique vertex id
     int vertex_id;
+    // a dart incident to this Vertex:
     int dart_id;
 
     // constructor without arguments
@@ -68,16 +40,16 @@ struct Vertex {
     Vertex(const double &x, const double &y, const double &z) : point(Point(x,y,z))
     {}
 
-
-    // a dart incident to this Vertex:
-    // ...
-
 };
 
 struct Edge {
+    // unique edge id
     int eid;
+    // index of vertex at start of edge
     int start;
+    // index of vertex at end of edge
     int end;
+    // a dart incident to this Edge:
     int dart;
 
     // comparison operator
@@ -86,8 +58,6 @@ struct Edge {
             return true;
         }
     }
-    // a dart incident to this Edge:
-    // ...
 
     // function to compute the barycenter for this Edge (needed for triangulation output):
     // Point barycenter() {}
@@ -96,24 +66,18 @@ struct Edge {
 struct Face {
     // the vertices of this face:
 public:
+    // unique face id
     int fid;
+    // a dart incident to this Face:
     int dart;
+    // indices of vertices forming the face
     std::vector<int> index_list;
+    // indices of edges forming the face
     std::vector<int> edge_list;
+    // all darts that belong to this face
     std::vector<Dart> face_Darts;
 
-    friend std::ostream &operator << (std::ostream &os, const Vertex& rhs){
-        os << "Vertex = " << rhs.point;
-        return os;
-    }
-
-    //Face() { };
-
-
-    // a dart incident to this Face:
-    // ...
-
-    // function to compute the barycenter for this Face (needed for triangulation output):
+    // function to compute the barycenter for this Face (maybe needed for triangulation output):
     ////   Point barycenter(std::vector<Point> face_vertices) {
     ////      float number_vertices = face_vertices.size()
     ////      for (i = 0; i <= number_vertices; number_vertices ++){
@@ -125,9 +89,10 @@ public:
 };
 
 struct Volume {
+    // unique identifier for this volume
+    int vid;
     // a dart incident to this Volume:
-    // ...
-
+    int dart;
 };
 
 
