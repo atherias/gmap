@@ -31,28 +31,18 @@ Then you could create and link Darts like:
 */
 
 struct Dart {
-    //  // cells - ids that link to other tables?:
+// cells - ids that link to other tables
     int dart_id;
     int vertex_id;
     int edge_id;
     int face_id;
     int volume_id;
 
-//  // involutions: should be pointers to other darts
+// involutions: indices of other darts
     int a0;
     int a1;
     int a2;
     int a3;
-
-
-
-
-    // previous implementation
-//    int dart_id; // id of the dart
-//    int vertex_id; // vertex id (it needs only one)
-//    int edge_id; // edge id
-//    int face_id; // face id
-//    int volume_id; // volume id
 
     // involutions:
     // ..
@@ -70,8 +60,6 @@ struct Vertex {
     int vertex_id;
     int dart_id;
 
-
-
     // constructor without arguments
     Vertex() : point(Point())
     {}
@@ -88,7 +76,6 @@ struct Vertex {
 
 struct Edge {
     int eid;
-    // removed ampersand
     int start;
     int end;
     int dart;
@@ -115,13 +102,6 @@ public:
     std::vector<int> edge_list;
     std::vector<Dart> face_Darts;
 
-//    int a, b, c, d;
-//
-//    Vertex a1;
-//    Vertex b1;
-//    Vertex c1;
-//    Vertex d1;
-
     friend std::ostream &operator << (std::ostream &os, const Vertex& rhs){
         os << "Vertex = " << rhs.point;
         return os;
@@ -134,7 +114,13 @@ public:
     // ...
 
     // function to compute the barycenter for this Face (needed for triangulation output):
-    // Point barycenter() {}
+    ////   Point barycenter(std::vector<Point> face_vertices) {
+    ////      float number_vertices = face_vertices.size()
+    ////      for (i = 0; i <= number_vertices; number_vertices ++){
+    ////          sum_vertices += p;
+    ////      }
+    ////      return sum_vertices/number_vertices;
+    ////   }
 
 };
 

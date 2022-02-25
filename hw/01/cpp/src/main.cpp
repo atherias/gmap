@@ -36,12 +36,11 @@ bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
     }
 }
 
+// is this needed??
 // FUNCTION TO PASS BY REFERENCE SO WE ASSIGN A VALUE :
 void assign_dart_id(Dart *n, Dart o){
     (*n).a1 = o.dart_id;
 }
-
-
 
 int main(int argc, const char * argv[]) {
 //  std::string file_in = "torus.obj";
@@ -90,7 +89,7 @@ int main(int argc, const char * argv[]) {
             std::string word;
             iss >> word;
 
-            // If line begins with "v", instantiate a vertex and add to vertices vector
+            // If line begins with "v", instantiate a vertex and add it to vertices vector
             if (word == "v") {
                 std::vector<float> coordinates;
                 while (iss >> word) coordinates.push_back(std::stof(word));
@@ -103,7 +102,7 @@ int main(int argc, const char * argv[]) {
                 }
                 else vertices.push_back(Vertex());
             }
-            // If line begins with "f", instantiate a face and add to faces vector along with current dart_id:
+            // If line begins with "f", instantiate a face and add to faces vector, assign the current dart_id:
             if (word == "f") {
                 faces.emplace_back(Face{k, dart_id});
 
@@ -115,13 +114,16 @@ int main(int argc, const char * argv[]) {
                 // create a vector that will contain the darts of the current face
                 std::vector<Dart> darts_face;
 
-                // iterate over indices and instantiate edges with indices used to determine start and end of each edge
-                // add edges to edges vector if they are not already found in the unordered map (to avoid duplicate edges)
-                // first, instantiate all edges except the last one (this is done later)
+                // ## Storing edges ##
+                // Iterate over indices to determine start and end of each edge of the current face
+                // Create edges from these indices and add to to edges vector if they are not already found
+                // in the unordered map (to avoid duplicate edges)
+
+                // --- --- --- --- ---  PROCESS OF ALL EDGES EXCEPT THE LAST ONE --- --- --- ---- ----
                 for (i = 0; i < indices.size() - 1; i++) {
-                    // create a pair of indices that designate the start and end point of the edge
+                    // create a pair of indices that designate the start and end of the edge
                     std::pair<int, int> pair_edge1(indices[i], indices[i + 1]);
-                    // create another pair that flips the start and end points of the edge
+                    // create another pair that flips the start and end of the edge
                     std::pair<int, int> pair_edge11(indices[i + 1], indices[i]);
 
                     // instantiate a checker for each pair: these search the unordered map and return True if the pair is found
@@ -139,7 +141,7 @@ int main(int argc, const char * argv[]) {
                         darts.emplace_back(new_dart);
                         darts_face.emplace_back(new_dart);
 
-                        // assign the dart_id to the first vertex used to create the dart, increment dart_id
+                        // assign the dart_id to the first vertex used to create the dart, then increment dart_id
                         (vertices[indices[i]]).dart_id = dart_id;
                         dart_id++;
 
@@ -161,47 +163,41 @@ int main(int argc, const char * argv[]) {
                             // ARE BOTH IFs NECESSARY?
                             if (unordered_map_2.at(pair_edge1)) {
                                 // retrieve index of the pair in the map, create a new dart using the retrieved edge id
+                                // add to darts vector and darts face vector
+                                // for each dart created, assign dart_id to the first vertex used to create the dart, increment dart_id
                                 int e_existing = unordered_map_2.at(pair_edge1);
+
                                 Dart new_dart({dart_id, indices[i] + 1, e_existing, k, 1, dart_id + 1});
                                 darts.emplace_back(new_dart);
-                                // add the dart to the darts_face
                                 darts_face.emplace_back(new_dart);
-                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
                                 (vertices[indices[i]]).dart_id = dart_id;
-                                // then increase the dart_id!
                                 dart_id++;
 
                                 Dart new_dart1({dart_id, indices[i + 1] + 1, e_existing, k, 1, dart_id - 1});
                                 darts.emplace_back(new_dart1);
-                                // add the dart to the darts_face
                                 darts_face.emplace_back(new_dart1);
                                 dart_id++;
-
-                                // We don't need to increase the value of e at all. since we are just retrieving an existing one.
                             }
                         }
 
-                        if (checker11) { // check if it exists because otherwise, .at function cannot return a value
+                        // check if pair of edge vertices exists when order is reversed (start becomes end)
+                        if (checker11) {
                             if (unordered_map_2.at(pair_edge11)) {
-                                //int value_edge = unordered_map_2.at(pair_edge11);
-                                //std::cout << "Value from umap = " << unordered_map_2.at(pair_edge11) << std::endl;
+                                // retrieve index of the pair in the map, create a new dart using the retrieved edge id
+                                // add to darts vector and darts face vector
+                                // for each dart created, assign dart_id to the first vertex used to create the dart, increment dart_id
                                 int e_existing = unordered_map_2.at(pair_edge11);
+
                                 Dart new_dart({dart_id, indices[i] + 1, e_existing, k, 1, dart_id + 1});
                                 darts.emplace_back(new_dart);
-                                // add the dart to the darts_face
                                 darts_face.emplace_back(new_dart);
-                                // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
                                 (vertices[indices[i]]).dart_id = dart_id;
-                                // then increase the dart_id!
                                 dart_id++;
 
                                 Dart new_dart1({dart_id, indices[i + 1] + 1, e_existing, k, 1, dart_id - 1});
                                 darts.emplace_back(new_dart1);
-                                // add the dart to the darts_face
                                 darts_face.emplace_back(new_dart1);
                                 dart_id++;
-
-                                // We don't need to increase the value of e at all. since we are just retrieving an existing one.
                             }
                         }
                     } // end of else
@@ -209,72 +205,53 @@ int main(int argc, const char * argv[]) {
                 } // end of iteration over the indices
                 // --- --- --- --- ---  END OF ALL EDGES BUT ONE --- --- --- ---- ----
 
-
-
                 // beginning of LAST EDGE ! -----------------------------------------------------------------------------
-                // Last Edge: create edge connecting begin to end
+                // Last Edge: create edge pair connecting last vertex to first vertex (close the face) and apply the same procedure as above
 
                 int last_element = indices.size() - 1;
+
+                // create a pair of indices that designate the start and end point of the edge
                 std::pair<int, int> pair_edge_final(indices[last_element], indices[0]);
+                // create another pair that flips the start and end points of the edge
                 std::pair<int, int> pair_edge_final_reversed(indices[0], indices[last_element]);
+
                 bool checker2 = check_double_key(unordered_map_2, pair_edge_final);
                 bool checker22 = check_double_key(unordered_map_2, pair_edge_final_reversed);
 
-
-// check if vector exists
-                if (!(checker2) && !(checker22)) { //&& (checker1==0 || checker11==0) && (checker1==0 || checker11==1)){
-                    //if (checker11==0){
-                    // insert it in the unordered map
-
+                // check if both checkers return False: this means the edge does not already exist in the unordered map
+                if (!(checker2) && !(checker22)) {
                     unordered_map_2[pair_edge_final] = e;
-
-                    //unordered_map_2.insert((indices[0], indices[1]),1);
                     Edge new_edge = Edge{e, indices[last_element], indices[0], dart_id};
                     edges.emplace_back(new_edge);
 
                     Dart new_dart({dart_id, indices[last_element] + 1, e, k, 1, dart_id + 1});
                     darts.emplace_back(new_dart);
-                    // add the dart to the darts_face
                     darts_face.emplace_back(new_dart);
-                    // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
-                    //vertices[indices[last_element]].dart_id = dart_id;
                     (vertices[indices[last_element]]).dart_id = dart_id;
-                    // then increase the dart_id!
                     dart_id++;
 
                     Dart new_dart1({dart_id, indices[0] + 1, e, k, 1, dart_id - 1});
                     darts.emplace_back(new_dart1);
-                    // add the dart to the darts_face
                     darts_face.emplace_back(new_dart1);
                     dart_id++;
 
                     e++;
-
-                } else {
-                    // LOGIC SAYS: every time we add an edge, or we don't add it but we retrieve its name from the unordered map, we create a DART.
-                    // here, the Edge IS IN the MAP, so firstly we retrieve its name, then we create the dart.
-
-                    // we are missing e! we have to find it. we are retrieving it from the unordered map.
-
-
+                }
+                else {
+                    // find the edge_id of the current edge by retrieving it from the unordered map
+                    // the order of the vertices defining the start and end of the edge matter, therefore find which pair exists in the map
                     if (checker2) {
                         if (unordered_map_2.at(pair_edge_final)) {
-                            //int value_edge = unordered_map_2.at(pair_edge_final);
-                            //std::cout <<"Value from umap = " << unordered_map_2.at(pair_edge_final) << std::endl;
                             int e_existing = unordered_map_2.at(pair_edge_final);
+
                             Dart new_dart({dart_id, indices[last_element] + 1, e_existing, k, 1, dart_id + 1});
                             darts.emplace_back(new_dart);
-                            // add the dart to the darts_face
                             darts_face.emplace_back(new_dart);
-                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
-                            //vertices[indices[last_element]].dart_id = dart_id;
                             (vertices[indices[last_element]]).dart_id = dart_id;
-                            // then increase the dart_id!
                             dart_id++;
 
                             Dart new_dart1({dart_id, indices[0] + 1, e_existing, k, 1, dart_id - 1});
                             darts.emplace_back(new_dart1);
-                            // add the dart to the darts_face
                             darts_face.emplace_back(new_dart1);
                             dart_id++;
 
@@ -282,22 +259,21 @@ int main(int argc, const char * argv[]) {
                     }
                     if (checker22) {
                         if (unordered_map_2.at(pair_edge_final_reversed)) {
+                            // UNECESSARY VALUE EDGE?
                             int value_edge = unordered_map_2.at(pair_edge_final_reversed);
-                            //std::cout << "Value from umap = " << unordered_map_2.at(pair_edge_final_reversed) << std::endl;
+
                             int e_existing = unordered_map_2.at(pair_edge_final_reversed);
+
                             Dart new_dart({dart_id, indices[last_element] + 1, e_existing, k, 1, dart_id + 1});
                             darts.emplace_back(new_dart);
-                            // add the dart to the darts_face
                             darts_face.emplace_back(new_dart);
-                            // LOGIC SAYS: every time we add a dart, we should add it to the vertex we used for the creation of the dart. In one of the two.
                             vertices[indices[last_element]].dart_id = dart_id;
-                            // then increase the dart_id!
                             dart_id++;
 
                             Dart new_dart1({dart_id, indices[0] + 1, e_existing, k, 1, dart_id - 1});
                             // NO MEANING IN THIS ASSIGNMENT BUT IT IS PRINTED IN THE END. --> new_dart1.a1 = 2;
+                            //I don't understand the comment above
                             darts.emplace_back(new_dart1);
-                            // add the dart to the darts_face
                             darts_face.emplace_back(new_dart1);
                             dart_id++;
 
@@ -306,59 +282,42 @@ int main(int argc, const char * argv[]) {
                 } // end of else
                 // --- -----------  ------ - END OF LAST EDGE --- ---  ---- --- --- --- --- -  - - - -
 
-                // THE PROBLEM is solved. CANNOT ASSIGNE VALUES. SOS -- S0S -- S0S --> DIFFERENCE WITH for (auto d: darts)
-                // https://stackoverflow.com/questions/51954966/iterate-through-a-vector-of-objects-and-find-a-variable-that-matches-one-pulled
-//                for (auto j= darts.begin(); j != darts.end(); j++){
-//                    j->a1 = 3;
-//                }
-
-
-                // Make a vector of darts just for the current face
-
-                // IT WORKS!
+                // ## GET ALPHA 1 ##
+                // Iterate over all darts in the darts vector
+                // find a dart from the current face that has the same face id and vertex id but different edge id
+                // the id of the dart that satisfies these conditions is the result of involution alpha 1
                 for (auto d = darts.begin(); d != darts.end(); d++){
                     for (auto j: darts_face){
-                        //std::cout << "dart_id d: " << d.dart_id << "   a1: " << d.a1 << std::endl;
-                        //std::cout << "dart_id j: " << j.dart_id << "   a1: " << d.a1 << std::endl;
                         if (d->face_id == j.face_id){
                             if (d->vertex_id == j.vertex_id){
                                 if (d->edge_id != j.edge_id){
-                                    //std::cout << "j.dart_id " << j.dart_id << std::endl;
                                     d->a1 = j.dart_id;
-                                    //std::cout << "d.a1 " << d.a1 << std::endl;
                                 }
                             }
                         }
                     }
                 }
 
-
-
-                //increase k for increasing the id of faces
+                // increment k before moving to the next face and clear the vector of darts for the current face
                 k++;
                 darts_face.clear();
             } // end of if word == f
         } // end of while
 
         // AFTER READING THE FILE
+        // ## GET ALPHA 2 ##
         /* find alpha 2 for every dart by searching for another dart in any other face, with the same 0-cell and 1-cell */
         for (auto dd = darts.begin(); dd != darts.end(); dd++){
             for (auto dj: darts){
-                //std::cout << "dart_id d: " << d.dart_id << "   a1: " << d.a1 << std::endl;
-                //std::cout << "dart_id j: " << j.dart_id << "   a1: " << d.a1 << std::endl;
                 if (dd->vertex_id == dj.vertex_id){
                     if (dd->edge_id == dj.edge_id){
                         if (dd->face_id != dj.face_id){
-                            //std::cout << "j.dart_id " << j.dart_id << std::endl;
                             dd->a2 = dj.dart_id;
-                            //std::cout << "d.a1 " << d.a1 << std::endl;
                         }
                     }
                 }
             }
         }
-
-
 
     } // here we close the FILE --> END
 
