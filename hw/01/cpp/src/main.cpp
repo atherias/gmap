@@ -409,6 +409,16 @@ int main(int argc, const char * argv[]) {
     // keep track of visited faces
     std::vector<int> visited_faces;
     std::vector<Point> barycenters;
+    std::unordered_map<std::string, Vertex> unordered_map_3 = {};
+    std::stringstream streamy;
+
+    // add all coordinates of vertices to unordered map as string
+    for (auto a = vertices.begin(); a != vertices.end(); a++){
+        char coord_x = streamy << a->point.x;
+        float y = a->point.y;
+        float z = a->point.z;
+        unordered_map_3.insert ({coord_x,a});
+    }
 
         // ## Create triangles from the darts ##
         for (auto z = darts.begin(); z != darts.end(); z++) {
@@ -423,17 +433,31 @@ int main(int argc, const char * argv[]) {
             //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
             Point barycenter_edge = (vertices[edge_start].point + vertices[edge_end].point) / 2;
 
-//            //DONT KNOW HOW !! check if edge has been visited (i.e. if barycenter is already in the vector of vertices)
-            auto found = std::find(visited_edges.begin(), visited_edges.end(), dart_edge);
-            if (found != visited_edges.end()) {
-                current_triangle_vertices.emplace_back(z->vertex_id);
+
+//            //NEED TO CHECK IF BARYCENTER IS ALREADY STORED AS VERTEX. Have explored a few options, in order of likely success:
+//          option 1: add coordinates of points as string (key) and point id (value) to unordered map and then check if the point is in unordered map
+
+//          option 2: compare this point to points in vertices. Not working - doesn't seem to recognize when two points are equal
+            for (auto l = vertices.begin(); l != vertices.end(); l++){
+                if (l->point == barycenter_edge){
+
+                }
             }
-            else {
-                Vertex new_v(barycenter_edge.x, barycenter_edge.y, barycenter_edge.z);
-                new_v.vertex_id = vertices.size()+1;
-                vertices.emplace_back(new_v);
-                visited_edges.emplace_back(edges[dart_edge-1]);
-            }
+//
+//            option 3: check if edge has been visited - but how to then figure out which vertex id it has??
+//            auto found = std::find(visited_edges.begin(), visited_edges.end(), dart_edge);
+//            if (found != visited_edges.end()) {
+//                current_triangle_vertices.emplace_back(z->vertex_id);
+//            }
+//            else {
+//                Vertex new_v(barycenter_edge.x, barycenter_edge.y, barycenter_edge.z);
+//                new_v.vertex_id = vertices.size()+1;
+//                vertices.emplace_back(new_v);
+//                visited_edges.emplace_back(edges[dart_edge-1]);
+//            }
+
+
+
             current_triangle_vertices.clear();
             }
 
