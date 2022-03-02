@@ -37,7 +37,7 @@ bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
 int main(int argc, const char * argv[]) {
 
     // ## Define input and output files ##
-    std::string file_in = "torus.obj";
+    std::string file_in = "cube.obj";
     std::string file_out_obj = "torus_triangulated.obj";
     std::string file_out_csv_d = "torus_darts.csv";
     std::string file_out_csv_0 = "torus_vertices.csv";
@@ -399,16 +399,74 @@ int main(int argc, const char * argv[]) {
     for (auto j = volumes.begin(); j != volumes.end(); ++j) {
         stream_out5 << j->vid << ";" << j->dart << std::endl;
 
-
+    }
         // --- --- --- --- TRIANGULATION --- --- --- ---
+    std::vector<int> triangle_faces;
+    //create a local "current_triangle_vertices" vector of integers
+    std::vector<int> current_triangle_vertices;
+    // keep track of visited edges
+    std::vector<Edge> visited_edges;
+    // keep track of visited faces
+    std::vector<int> visited_faces;
+    std::vector<Point> barycenters;
 
         // ## Create triangles from the darts ##
+        for (auto z = darts.begin(); z != darts.end(); z++) {
+            //get vertex index from dart, add this index to current_triangle_vertices
+            current_triangle_vertices.emplace_back(z->vertex_id);
+
+            //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
+            int dart_edge = z->edge_id;
+            int edge_start = edges[dart_edge].start;
+            int edge_end = edges[dart_edge].end;
+
+            //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
+            Point barycenter_edge = (vertices[edge_start].point + vertices[edge_end].point) / 2;
+
+//            //DONT KNOW HOW !! check if edge has been visited (i.e. if barycenter is already in the vector of vertices)
+            auto found = std::find(visited_edges.begin(), visited_edges.end(), dart_edge);
+            if (found != visited_edges.end()) {
+                current_triangle_vertices.emplace_back(z->vertex_id);
+            }
+            else {
+                Vertex new_v(barycenter_edge.x, barycenter_edge.y, barycenter_edge.z);
+                new_v.vertex_id = vertices.size()+1;
+                vertices.emplace_back(new_v);
+                visited_edges.emplace_back(edges[dart_edge-1]);
+            }
+            current_triangle_vertices.clear();
+            }
+
+
+//            //4. get face id from dart. use id to get the face from faces vector and get the indices of vertexes that make up the face.
+//            int dart_face = z->face_id;
+//            std::vector<int> face_vertices = faces[dart_face].index_list;
+//            //use these vertex ids to retrieve points
+//            std::vector<Point> face_vertices_coordinates;
+//            for (auto w = face_vertices.begin(); w != face_vertices.end(); ++w){
+//                face_vertices_coordinates.emplace_back(vertices[w]->point);
+//            }
+//
+//            // Calculate barycenter of the face
+//
+//            Point barycenter_face (std::vector<Point> face_vertices) {
+                ////      float number_vertices = face_vertices.size()
+                ////      for (i = 0; i <= number_vertices; number_vertices ++){
+                ////          sum_vertices += p;
+                ////      }
+            //check if barycenter is already in the vector of vertices. if so, retrieve vertex id and add to current_triangle_vertices.
+            //If not, create vertex, add it to the vector of vertices, get its index and add to current_triangle_vertices.
+
+            //5. once three vertices have been defined for this triangle, check if their order enables the correct orientation,
+
+            //if not, change the order. then, add this vector of integers to the triangle_face vector.
+
 
         // ## Write triangles to obj ##
-
+        //after all darts have been visited, write to file. First, write all vertices, then all faces.
         return 0;
     }
-}
+
 
 // notes --- TO BE DELETED IN THE END --- ---
 
