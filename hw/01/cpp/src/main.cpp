@@ -97,12 +97,12 @@ int main(int argc, const char * argv[]) {
             }
             // If line begins with "f", instantiate a face and add to faces vector, assign the current dart_id:
             if (word == "f") {
-                faces.emplace_back(Face{k, dart_id});
-
                 // create a vector and add the vertex indices belonging to the current face
                 // subtract 1 from index value to align index of obj with c++ index
                 std::vector<int> indices;
                 while (iss >> word) indices.push_back(std::stoi(word) - 1);
+
+                faces.emplace_back(Face{k, dart_id, indices});
 
                 // create a vector that will contain the darts of the current face
                 std::vector<Dart> darts_face;
@@ -401,94 +401,70 @@ int main(int argc, const char * argv[]) {
 
     }
         // --- --- --- --- TRIANGULATION --- --- --- ---
-    std::vector<int> triangle_faces;
-    //create a local "current_triangle_vertices" vector of integers
-    std::vector<int> current_triangle_vertices;
-    // keep track of visited edges
-    std::vector<Edge> visited_edges;
-    // keep track of visited faces
-    std::vector<int> visited_faces;
-    std::vector<Point> barycenters;
-    std::unordered_map<std::string, Vertex> unordered_map_3 = {};
-    std::stringstream streamy;
+    // ## Create triangles from the darts ##
 
-    // add all coordinates of vertices to unordered map as string
-    for (auto a = vertices.begin(); a != vertices.end(); a++){
-        char coord_x = streamy << a->point.x;
-        float y = a->point.y;
-        float z = a->point.z;
-        unordered_map_3.insert ({coord_x,a});
+    // LOOP through the edges: create the barycenters
+    for (auto z=edges.begin(); z!=edges.end();z++){
+        //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
+        int edge_start = z->start;
+        int edge_end = z->end;
+
+        z->bary_id = vertex_id;
+        Point barycenter_edge = (vertices[edge_start].point + vertices[edge_end].point) / 2;
+        Vertex new_vertex_la = Vertex({barycenter_edge.x, barycenter_edge.y, barycenter_edge.z});
+        new_vertex_la.vertex_id = vertex_id;
+        vertices.emplace_back(new_vertex_la);
+        vertex_id++;
+        //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
     }
 
-        // ## Create triangles from the darts ##
-        for (auto z = darts.begin(); z != darts.end(); z++) {
-            //get vertex index from dart, add this index to current_triangle_vertices
-            current_triangle_vertices.emplace_back(z->vertex_id);
+    //std::cout << vertices.size() << std::endl;
 
-            //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
-            int dart_edge = z->edge_id;
-            int edge_start = edges[dart_edge].start;
-            int edge_end = edges[dart_edge].end;
+    // LOOP through the faces: create the barycenters
+    for (auto x=faces.begin(); x!=faces.end();x++){
+        x->bary_id = vertex_id;
+        Point barycenter_face = (vertices[x->index_list[0]].point + vertices[x->index_list[1]].point + vertices[x->index_list[2]].point +
+                                 vertices[x->index_list[3]].point) / 4;
+        Vertex new_vertex_bla = Vertex({barycenter_face.x, barycenter_face.y, barycenter_face.z});
+        vertices.emplace_back(new_vertex_bla);
+        new_vertex_bla.vertex_id = vertex_id;
+        vertex_id++;
+    }
 
-            //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
-            Point barycenter_edge = (vertices[edge_start].point + vertices[edge_end].point) / 2;
-
-
-//            //NEED TO CHECK IF BARYCENTER IS ALREADY STORED AS VERTEX. Have explored a few options, in order of likely success:
-//          option 1: add coordinates of points as string (key) and point id (value) to unordered map and then check if the point is in unordered map
-
-//          option 2: compare this point to points in vertices. Not working - doesn't seem to recognize when two points are equal
-            for (auto l = vertices.begin(); l != vertices.end(); l++){
-                if (l->point == barycenter_edge){
-
-                }
-            }
-//
-//            option 3: check if edge has been visited - but how to then figure out which vertex id it has??
-//            auto found = std::find(visited_edges.begin(), visited_edges.end(), dart_edge);
-//            if (found != visited_edges.end()) {
-//                current_triangle_vertices.emplace_back(z->vertex_id);
-//            }
-//            else {
-//                Vertex new_v(barycenter_edge.x, barycenter_edge.y, barycenter_edge.z);
-//                new_v.vertex_id = vertices.size()+1;
-//                vertices.emplace_back(new_v);
-//                visited_edges.emplace_back(edges[dart_edge-1]);
-//            }
+//        // size of vector vertices
+//       std::cout << "size: " << vertices.size() << std::endl;
 
 
+    std::vector<std::vector<int>> triangles;
+    // ITERATE THROUGH THE DARTS
+    for (auto z = darts.begin(); z != darts.end(); z++) {
+        //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
+        int dart_edge = z->edge_id;
+        int dart_face = z->face_id;
 
-            current_triangle_vertices.clear();
-            }
+        std::vector<int> triangle_vertices;
+        triangle_vertices.emplace_back(edges[dart_edge-1].bary_id);
+        triangle_vertices.emplace_back(faces[dart_face-1].bary_id);
+        triangle_vertices.emplace_back(z->vertex_id);
 
+        triangles.emplace_back(triangle_vertices);
+    }
 
-//            //4. get face id from dart. use id to get the face from faces vector and get the indices of vertexes that make up the face.
-//            int dart_face = z->face_id;
-//            std::vector<int> face_vertices = faces[dart_face].index_list;
-//            //use these vertex ids to retrieve points
-//            std::vector<Point> face_vertices_coordinates;
-//            for (auto w = face_vertices.begin(); w != face_vertices.end(); ++w){
-//                face_vertices_coordinates.emplace_back(vertices[w]->point);
-//            }
-//
-//            // Calculate barycenter of the face
-//
-//            Point barycenter_face (std::vector<Point> face_vertices) {
-                ////      float number_vertices = face_vertices.size()
-                ////      for (i = 0; i <= number_vertices; number_vertices ++){
-                ////          sum_vertices += p;
-                ////      }
-            //check if barycenter is already in the vector of vertices. if so, retrieve vertex id and add to current_triangle_vertices.
-            //If not, create vertex, add it to the vector of vertices, get its index and add to current_triangle_vertices.
+//    //print vertices
+    std::cout << "print vertices" << std::endl;
+    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
+        // Task: understand when it can print and when it cannot
+        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
+                  << "| z = " << j->point.z << std::endl;
+    }
 
-            //5. once three vertices have been defined for this triangle, check if their order enables the correct orientation,
-
-            //if not, change the order. then, add this vector of integers to the triangle_face vector.
-
-
-        // ## Write triangles to obj ##
-        //after all darts have been visited, write to file. First, write all vertices, then all faces.
-        return 0;
+    //print triangles
+    std::cout << "print triangles" << std::endl;
+    for (auto j: triangles) {
+        // Task: understand when it can print and when it cannot
+        std::cout << j[0] << ", " << j[1] << ", " << j[2] << std::endl;
+    }
+    return 0;
     }
 
 

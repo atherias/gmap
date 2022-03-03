@@ -52,6 +52,8 @@ struct Edge {
     // a dart incident to this Edge:
     int dart;
 
+    int bary_id;
+
     // comparison operator
     bool operator==(const Edge &other) const{
         if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
@@ -76,6 +78,8 @@ public:
     std::vector<int> edge_list;
     // all darts that belong to this face
     std::vector<Dart> face_Darts;
+
+    int bary_id;
 
     // function to compute the barycenter for this Face (maybe needed for triangulation output):
     ////   Point barycenter(std::vector<Point> face_vertices) {
