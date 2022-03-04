@@ -320,41 +320,6 @@ int main(int argc, const char * argv[]) {
     } // here we close the FILE --> END
 
 
-    // PRINTING DARTS, FACES, EDGES, VERTICES --- --- --- --- --- ---
-    //print faces
-//    std::cout << "print faces" << std::endl;
-//    for (auto j = faces.begin(); j != faces.end(); ++j) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j->fid << "| d" << j->dart << std::endl;
-//    }
-//    std::cout << " " << std::endl;
-//    //print edges
-//    std::cout << "print edges" << std::endl;
-//    for (auto j = edges.begin(); j != edges.end(); ++j) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j->eid << "| d=" << j->dart << std::endl;
-//    }
-//
-//    std::cout << " " << std::endl;
-//    //print vertices
-//    std::cout << "print vertices" << std::endl;
-//    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
-//                  << "| z = " << j->point.z << std::endl;
-//
-//    }
-//    std::cout << " " << std::endl;
-//    //print darts
-//    std::cout << "print darts" << std::endl;
-//    for (auto j = darts.begin(); j != darts.end(); ++j) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j->dart_id << " | a0= " << j->a0 << " | a1= " << j->a1 << " | a2= " << j->a2 << " | v"
-//                  << j->vertex_id << " | e"
-//                  << j->edge_id << " | f" << j->face_id << std::endl;
-//    }
-
-
     // --- --- --- --- --- --- OUTPUTS CSV FILES --- --- --- --- --- ---
 
     // ## Output generalised map to CSV ##
@@ -406,23 +371,24 @@ int main(int argc, const char * argv[]) {
 
     // LOOP through the edges: create the barycenters
     for (auto z=edges.begin(); z!=edges.end();z++){
-        //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
+        //for every edge, get the start and end vertex ids.
         int edge_start = z->start;
         int edge_end = z->end;
 
+        //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
         z->bary_id = vertex_id;
         Point barycenter_edge = (vertices[edge_start].point + vertices[edge_end].point) / 2;
         Vertex new_vertex_la = Vertex({barycenter_edge.x, barycenter_edge.y, barycenter_edge.z});
         new_vertex_la.vertex_id = vertex_id;
         vertices.emplace_back(new_vertex_la);
         vertex_id++;
-        //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the edge.
-    }
 
-    //std::cout << vertices.size() << std::endl;
+    }
 
     // LOOP through the faces: create the barycenters
     for (auto x=faces.begin(); x!=faces.end();x++){
+        //for every face, get the vertex ids
+        //use these vertex ids to retrieve vertex coordinates, then calculate barycenter of the face
         x->bary_id = vertex_id;
         Point barycenter_face = (vertices[x->index_list[0]].point + vertices[x->index_list[1]].point + vertices[x->index_list[2]].point +
                                  vertices[x->index_list[3]].point) / 4;
@@ -433,14 +399,10 @@ int main(int argc, const char * argv[]) {
         vertex_id++;
     }
 
-//        // size of vector vertices
-//       std::cout << "size: " << vertices.size() << std::endl;
-
-
     std::vector<std::vector<int>> triangles;
     // ITERATE THROUGH THE DARTS
     for (auto z = darts.begin(); z != darts.end(); z++) {
-        //get edge id from dart, use id to get the edge from the edge vector and get the start and end vertex ids.
+        //get edge id, face id and vertex id from the dart, use these to form vertex ids for each triangle
         int dart_edge = z->edge_id;
         int dart_face = z->face_id;
 
@@ -452,27 +414,13 @@ int main(int argc, const char * argv[]) {
         triangles.emplace_back(triangle_vertices);
     }
 
-////    //print vertices
-//    std::cout << "print vertices" << std::endl;
-//    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
-//                  << "| z = " << j->point.z << std::endl;
-//    }
-//
-//    //print triangles
-//    std::cout << "print triangles" << std::endl;
-//    for (auto j: triangles) {
-//        // Task: understand when it can print and when it cannot
-//        std::cout << j[0] << ", " << j[1] << ", " << j[2] << std::endl;
-//    }
-
 
     // --- --- --- --- --- --- OUTPUTS OBJ FILE --- --- --- --- --- ---
 
     // ## Output triangulation to OBJ ##
 
     // ## 1) output triangulation obj file ##
+    // iterate over vertices vector and write coordinates
     std::ofstream stream_out10;
     stream_out10.open(file_out_obj);
     stream_out10 << " " << std::endl;
@@ -481,7 +429,9 @@ int main(int argc, const char * argv[]) {
     }
 
 
-    // ORIENTATION hardcoded
+    // Ensure all faces are facing the same direction:
+    // since we know that triangles were constructed with vertex, edge barycenter, face barycenter,
+    // we alternate order of the writing of the face vertices for every other line.
     int skgit= 1;
     for (auto j: triangles) {
         if (skgit%2){
