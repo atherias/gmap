@@ -15,7 +15,7 @@ struct Dart {
     int vertex_id;
     int edge_id;
     int face_id;
-    int volume_id;
+    int volume_id = 1;
 
 // involutions: indices of other darts
     int a0;

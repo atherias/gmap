@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <cmath>
 
 #include "Gmap.h"
 #include <typeinfo>
@@ -37,7 +38,7 @@ bool check_double_key(std::unordered_map<pair, int, pair_hash> m, pair key){
 int main(int argc, const char * argv[]) {
 
     // ## Define input and output files ##
-    std::string file_in = "cube.obj";
+    std::string file_in = "torus.obj";
     std::string file_out_obj = "torus_triangulated.obj";
     std::string file_out_csv_d = "torus_darts.csv";
     std::string file_out_csv_0 = "torus_vertices.csv";
@@ -373,7 +374,7 @@ int main(int argc, const char * argv[]) {
     stream_out2 << "id;dart;x;y;z" << std::endl;
     for (auto j = vertices.begin(); j != vertices.end(); ++j) {
         stream_out2 << j->vertex_id << ";" << j->dart_id << ";" << j->point.x << ";" << j->point.y << ";" << j->point.z
-                << std::setprecision(2) << std::fixed << std::endl;
+                    << std::setprecision(2) << std::fixed << std::endl;
     }
 
     // ## 3) output edges.csv file ##
@@ -400,7 +401,7 @@ int main(int argc, const char * argv[]) {
         stream_out5 << j->vid << ";" << j->dart << std::endl;
 
     }
-        // --- --- --- --- TRIANGULATION --- --- --- ---
+    // --- --- --- --- TRIANGULATION --- --- --- ---
     // ## Create triangles from the darts ##
 
     // LOOP through the edges: create the barycenters
@@ -426,8 +427,9 @@ int main(int argc, const char * argv[]) {
         Point barycenter_face = (vertices[x->index_list[0]].point + vertices[x->index_list[1]].point + vertices[x->index_list[2]].point +
                                  vertices[x->index_list[3]].point) / 4;
         Vertex new_vertex_bla = Vertex({barycenter_face.x, barycenter_face.y, barycenter_face.z});
-        vertices.emplace_back(new_vertex_bla);
         new_vertex_bla.vertex_id = vertex_id;
+        vertices.emplace_back(new_vertex_bla);
+
         vertex_id++;
     }
 
@@ -443,124 +445,54 @@ int main(int argc, const char * argv[]) {
         int dart_face = z->face_id;
 
         std::vector<int> triangle_vertices;
+        triangle_vertices.emplace_back(z->vertex_id);
         triangle_vertices.emplace_back(edges[dart_edge-1].bary_id);
         triangle_vertices.emplace_back(faces[dart_face-1].bary_id);
-        triangle_vertices.emplace_back(z->vertex_id);
 
         triangles.emplace_back(triangle_vertices);
     }
 
-//    //print vertices
-    std::cout << "print vertices" << std::endl;
+////    //print vertices
+//    std::cout << "print vertices" << std::endl;
+//    for (auto j = vertices.begin(); j != vertices.end(); ++j) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
+//                  << "| z = " << j->point.z << std::endl;
+//    }
+//
+//    //print triangles
+//    std::cout << "print triangles" << std::endl;
+//    for (auto j: triangles) {
+//        // Task: understand when it can print and when it cannot
+//        std::cout << j[0] << ", " << j[1] << ", " << j[2] << std::endl;
+//    }
+
+
+    // --- --- --- --- --- --- OUTPUTS OBJ FILE --- --- --- --- --- ---
+
+    // ## Output triangulation to OBJ ##
+
+    // ## 1) output triangulation obj file ##
+    std::ofstream stream_out10;
+    stream_out10.open(file_out_obj);
+    stream_out10 << " " << std::endl;
     for (auto j = vertices.begin(); j != vertices.end(); ++j) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j->vertex_id << "| d=" << j->dart_id << "| x = " << j->point.x << "| y = " << j->point.y
-                  << "| z = " << j->point.z << std::endl;
+        stream_out10 << "v " << j->point.x << " " << j->point.y << " " << j->point.z << std::endl;
     }
 
-    //print triangles
-    std::cout << "print triangles" << std::endl;
+
+    // ORIENTATION hardcoded
+    int skgit= 1;
     for (auto j: triangles) {
-        // Task: understand when it can print and when it cannot
-        std::cout << j[0] << ", " << j[1] << ", " << j[2] << std::endl;
+        if (skgit%2){
+            stream_out10 << "f " << j[0] << " " << j[1] << " " << j[2] << std::endl;
+        }
+        else{
+            stream_out10 << "f " << j[1] << " " << j[0] << " " << j[2] << std::endl;
+        }
+        skgit++;
     }
+
+
     return 0;
-    }
-
-
-// notes --- TO BE DELETED IN THE END --- ---
-
-
-//                    // Just Print CONTENTS OF THE UNORDERED MAP
-//                    std::cout << "Contents of the unordered_map : \n";
-//                    for (auto p : unordered_map_2)
-//                        std::cout << "[" << (p.first).first << ", "
-//                             << (p.first).second << "] ==> "
-//                             << p.second << "\n";
-
-//                    for (auto const &entry: unordered_map_1)
-//                    {
-//                        auto key_pair = entry.first;
-//                        std::cout << "{" << key_pair.first << "," << key_pair.second << "}, "
-//                                  << entry.second << std::endl;
-//                    }
-
-// --------------------------------------------- EDGES
-//Edge new_edge1 =Edge{e, indices[0], indices[1]};
-//bool wtfq = std::count(edges.begin(),edges.end(),new_edge1);
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge1))){
-//                        edges.emplace_back(new_edge1);
-//                        // increase e only if inserted in the vector
-//                        e++;
-//                    }
-
-//Edge new_edge2 =Edge{e, indices[1], indices[2]};
-//bool wtf = std::count(edges.begin(),edges.end(),new_edge2);
-
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge2))){
-//                        edges.emplace_back(new_edge2);
-//                        e++;
-//                    }
-
-//Edge new_edge3 =Edge{e, indices[2], indices[3]};
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge3))){
-//                        edges.emplace_back(new_edge3);
-//                        e++;
-//                    }
-
-//Edge new_edge4 =Edge{e, indices[3], indices[0]};
-//                    if (!(std::count(edges.begin(),edges.end(),new_edge4))){
-//                        edges.emplace_back(new_edge4);
-//                        e++;
-//                    }
-
-
-//// ## Print to see the vertices are stored correctly
-//    for (auto i = vertices.begin(); i != vertices.end(); ++i){
-//        // why not possible i.x όπως δείχνει στο τέλος του Point.h για να τυπώσει σημείο;
-//        std::cout << i->point[0] << " " << i->point[1] << " " << i->point[2] << std::endl;
-//    }
-////
-
-//// ## Print to see the vertices are stored correctly
-//    //std::cout << faces.size() << std::endl;
-//    for (auto i = faces.begin(); i != faces.end(); ++i){
-//        std::cout << "print the faces" << std::endl;
-//        std::cout << i->a << " " << i->b << " " << i->c << " " << i->d << std::endl;
-//        // try to print the coordinates of the vertex:
-//        std::cout << "print/access the vertices of the faces" << std::endl;
-//        std::cout << vertices[i->a-1].point[0] << " " << vertices[i->a-1].point[1] << " " << vertices[i->a-1].point[2] << std::endl;
-//        std::cout << vertices[i->b-1].point[0] << " " << vertices[i->b-1].point[1] << " " << vertices[i->b-1].point[2] << std::endl;
-//        std::cout << vertices[i->c-1].point[0] << " " << vertices[i->c-1].point[1] << " " << vertices[i->c-1].point[2] << std::endl;
-//        std::cout << vertices[i->d-1].point[0] << " " << vertices[i->d-1].point[1] << " " << vertices[i->d-1].point[2] << std::endl;
-//    }
-
-
-// ## Construct generalised map using the structures from Gmap.h ##
-
-// Triangulation:
-//    // Step 1: create a new vertex of each of the edges of the face (polygon)
-//    for (auto i = faces.begin(); i != faces.end(); ++i){
-//        std::cout << "print the faces" << std::endl;
-//        std::cout << i->fid << " " << i->a1->point << " " << i->b1->point << " " << i->c1->point << " " << i->d1->point << std::endl;
-//        // try to print the coordinates of the vertex:
-//        std::cout << "print/access the vertices of the faces" << std::endl;
-//        std::cout << vertices[i->a-1].point[0] << " " << vertices[i->a-1].point[1] << " " << vertices[i->a-1].point[2] << std::endl;
-//        std::cout << vertices[i->b-1].point[0] << " " << vertices[i->b-1].point[1] << " " << vertices[i->b-1].point[2] << std::endl;
-//        std::cout << vertices[i->c-1].point[0] << " " << vertices[i->c-1].point[1] << " " << vertices[i->c-1].point[2] << std::endl;
-//        std::cout << vertices[i->d-1].point[0] << " " << vertices[i->d-1].point[1] << " " << vertices[i->d-1].point[2] << std::endl;
-//        std::cout << vertices[(i.d)-1].point[0] << " " << vertices[i->d-1].point[1] << " " << vertices[i->d-1].point[2] << std::endl;
-
-//        // NOT NEEDED FOR NOW: create a new vertex of each of the edges of the face (polygon)
-//        Point midpoint1 = midpoint_edge(vertices[i->a-1], vertices[i->b-1]);
-//        std::cout << "midpoint1 coordinates: " << midpoint1.x << " " << midpoint1.y << " " << midpoint1.z << std::endl;
-//        Point midpoint2 = midpoint_edge(vertices[i->b-1], vertices[i->c-1]);
-//        std::cout << "midpoint2 coordinates: " << midpoint2.x << " " << midpoint2.y << " " << midpoint2.z << std::endl;
-//        Point midpoint3 = midpoint_edge(vertices[i->c-1], vertices[i->d-1]);
-//        std::cout << "midpoint3 coordinates: " << midpoint3.x << " " << midpoint3.y << " " << midpoint3.z << std::endl;
-//        Point midpoint4 = midpoint_edge(vertices[i->d-1], vertices[i->a-1]);
-//        std::cout << "midpoint4 coordinates: " << midpoint4.x << " " << midpoint4.y << " " << midpoint4.z << std::endl;
-//
-
-//
-//    }
+}
