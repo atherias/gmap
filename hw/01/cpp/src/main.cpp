@@ -1,5 +1,6 @@
-
-// some standard libraries that are helpfull for reading/writing text files
+// Implementation of gmap and triangulation
+// Authors: Ioanna Panagiotidou (5616646), Tendai Mbwanda (5215544), Adele Therias (5485193)
+// some standard libraries that are helpful for reading/writing text files
 #include <iostream>
 #include <fstream>
 #include <string>

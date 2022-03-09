@@ -1,7 +1,7 @@
 GEO1004 - TU Delft
 Triangulating a polygonal mesh with generalised maps
 Submitted March 5 2022
-Authors: Ioanna Panagiotidou, Tendai, Adele Therias
+Authors: Ioanna Panagiotidou (5616646), Tendai Mbwanda (5215544), Adele Therias (5485193)
 
 The code completes the following tasks:
 1. reads a 3D polygonal mesh from an OBJ file,
@@ -12,8 +12,8 @@ The code completes the following tasks:
 **Important**
 
 - Ensure that you place the .obj input file in the CMake file for this project.
-- Specify pathway of input .obj file on line 41
-- Specify name of output .obj and .csv files on lines 42-47
+- Specify pathway of input .obj file on line 42
+- Specify names of output .obj and .csv files on lines 43-48
 
 To compile and run:
 
