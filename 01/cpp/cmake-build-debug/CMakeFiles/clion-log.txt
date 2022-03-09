@@ -1,0 +1,4 @@
+C:\Windows\system32\wsl.exe --distribution Ubuntu --exec /bin/sh -c "export CLION_IDE=TRUE && export JETBRAINS_IDE=TRUE && cd /mnt/c/Users/Adele/Documents/TU-Delft/Q3/GEO1004_3D-Modelling/geo1004.2022/hw/01/cpp/cmake-build-debug && /usr/local/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G 'CodeBlocks - Unix Makefiles' /mnt/c/Users/Adele/Documents/TU-Delft/Q3/GEO1004_3D-Modelling/geo1004.2022/hw/01/cpp"
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /mnt/c/Users/Adele/Documents/TU-Delft/Q3/GEO1004_3D-Modelling/geo1004.2022/hw/01/cpp/cmake-build-debug
