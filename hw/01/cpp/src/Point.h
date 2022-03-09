@@ -74,6 +74,10 @@ struct Point {
   const Point cross(const Point &other) const {
     return Point(y*other.z-z*other.y, -(x*other.z-z*other.x), x*other.y-y*other.x);
   }
+
+  bool operator==(const Point &other) {
+      return (x==other.x && y==other.y && z==other.z);
+  }
 };
 
 // function to print the coordinates of a point using eg `std::cout << p`, where p is a Point struct

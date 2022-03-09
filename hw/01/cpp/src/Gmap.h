@@ -1,5 +1,5 @@
 #pragma once
-//ioanna
+
 #include "Point.h"
 
 struct Point;
@@ -9,117 +9,107 @@ struct Edge;
 struct Face;
 struct Volume;
 
-/*
-Below you find the basic elements that you need to build the generalised map.
-The main thing you need to fill out are the links between the elements:
-  * the involutions and cells on the Dart
-  * the darts on the cells
-
-One way to do this is by using pointers. eg. define a member on the dart struct like
-
-  Struct Dart {
-    // involutions:
-    // indicate that a0 does not point to an object
-    Dart* a0 = nullptr;
-    // ...
-
-    // cells:
-    // ...
-  
-  };
-
-Then you could create and link Darts like:
-  
-  Dart* dart_a = new Dart();
-  Dart* dart_b = new Dart();
-
-  dart_a->a0 = dart_b;
-*/
-
 struct Dart {
-  // involutions:
-  int a0;
-  int a1;
-  int a2;
-  int a3;
+// cells - ids of cells that form the dart
+    int dart_id;
+    int vertex_id;
+    int edge_id;
+    int face_id;
+    int volume_id = 1;
 
-  // cells - ids that link to other tables?:
-  Vertex cell_0;
-  Edge cell_1;
-  Face cell_2;
-  Volume cell_3;
-
+// involutions: indices of other darts
+    int a0;
+    int a1;
+    int a2;
+    char a3;
 };
 
 struct Vertex {
-    // vertex id
-    char vertex_id;
+    // the coordinates of this vertex:
+    Point point;
+    // unique vertex id
+    int vertex_id;
+    // a dart incident to this Vertex:
+    int dart_id;
 
-  // the coordinates of this vertex:
-  Point point;
+    // constructor without arguments
+    Vertex() : point(Point())
+    {}
 
-  // constructor without arguments
-  Vertex() : point(Point()) 
-  {}
-
-  // constructor with x,y,z arguments to immediately initialise the point member on this Vertex.
-  Vertex(const double &x, const double &y, const double &z) : point(Point(x,y,z))
-  {}
-
-  // a dart incident to this Vertex:
-  // ...
+    // constructor with x,y,z arguments to immediately initialise the point member on this Vertex.
+    Vertex(const double &x, const double &y, const double &z) : point(Point(x,y,z))
+    {}
 
 };
 
 struct Edge {
-//    //edge id - maybe just use index
-//    char edge_id;
-
-    // start and end point
-    Vertex *edge_start;
-    Vertex *edge_end;
-
+    // unique edge id
+    int eid;
+    // index of vertex at start of edge
+    int start;
+    // index of vertex at end of edge
+    int end;
     // a dart incident to this Edge:
-  // ...
+    int dart;
 
-  // function to compute the barycenter for this Edge (needed for triangulation output):
-  Point barycenter(Point edge_end, Point edge_start) {
-      (edge_end - edge_start)/2;
-  }
+    int bary_id;
+
+    // comparison operator
+    bool operator==(const Edge &other) const{
+        if (((start == other.start) and (end == other.end)) || ((start == other.end) and (end == other.start))) {
+            return true;
+        }
+    }
+
+    // function to compute the barycenter for this Edge (needed for triangulation output):
+    // Point barycenter() {}
 };
 
 struct Face {
-    // unique face id - use index
-//    char face_id;
+    // the vertices of this face:
+public:
+    // unique face id
+    int fid;
+    // a dart incident to this Face:
+    int dart;
+    // indices of vertices forming the face
+    std::vector<int> index_list;
+    // indices of edges forming the face
+    std::vector<int> edge_list;
+    // all darts that belong to this face
+    std::vector<Dart> face_Darts;
 
-    // vector of face vertices
-    std::vector<Vertex> face_vertices;
+    int bary_id;
 
-// a dart incident to this Face:
-  // ...
-  // ...
-
-  // function to compute the barycenter for this Face (needed for triangulation output):
-   Point barycenter(std::vector<Point> face_vertices) {
-      float number_vertices = face_vertices.size()
-      for (i = 0; i <= number_vertices; number_vertices ++){
-          sum_vertices += p;
-      }
-      return sum_vertices/number_vertices;
-   }
+    // function to compute the barycenter for this Face (maybe needed for triangulation output):
+    ////   Point barycenter(std::vector<Point> face_vertices) {
+    ////      float number_vertices = face_vertices.size()
+    ////      for (i = 0; i <= number_vertices; number_vertices ++){
+    ////          sum_vertices += p;
+    ////      }
+    ////      return sum_vertices/number_vertices;
+    ////   }
 
 };
 
 struct Volume {
-    // unique volume id
-    char vol_id;
-
-    // vector of volume face vertices
-    std::vector Point volume_vertices;
-
-    // barycenter?
-
+    // unique identifier for this volume
+    int vid;
     // a dart incident to this Volume:
-  // ...
+    int dart;
+};
 
+
+// UNORDERED MAP
+#include <unordered_map>
+//#include <utility>
+
+// define an unordered map that accepts two values for key
+struct pair_hash
+{
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2> &pair) const {
+        return std::hash<T1>{}(pair.first) ^ std::hash<T2>{}(pair.second);
+        //return std::hash<T1>()(size.());
+    }
 };
